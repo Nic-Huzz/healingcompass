@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Supabase Connection</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        button {
+            background: #5e17eb;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 0;
+        }
+        button:hover {
+            background: #4a0fb8;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: monospace;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Test Supabase Connection</h1>
+        <p>This will test if your app can save data to Supabase.</p>
+        
+        <button onclick="testConnection()" id="testBtn">Test Supabase Connection</button>
+        
+        <div id="result"></div>
+        
+        <div class="info">
+            <h3>📋 What this tests:</h3>
+            <ul>
+                <li>✅ Supabase API endpoint is working</li>
+                <li>✅ Data format matches your table structure</li>
+                <li>✅ New record gets added to your database</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        async function testConnection() {
+            const btn = document.getElementById('testBtn');
+            const result = document.getElementById('result');
+            
+            btn.disabled = true;
+            btn.textContent = 'Testing...';
+            result.innerHTML = '';
+            
+            try {
+                const testData = {
+                    session_id: 'test_' + Date.now(),
+                    step: 'test_connection',
+                    user_name: 'Test User',
+                    ambition_gap: 'Testing Supabase integration',
+                    logical_reasons: 'This is a test entry',
+                    past_parallel: 'Test data',
+                    splinter_event: 'Test event',
+                    post_event_feeling: 'Test feeling',
+                    pre_splinter_identity: 'Test identity',
+                    splinter_identity: 'Test verdict',
+                    reclaim_consent: 'Test consent',
+                    protective_archetype: 'Test archetype',
+                    loop_acknowledged: 'Test acknowledgment',
+                    second_half_consent: 'Test consent 2',
+                    biology_understanding: 'Test understanding',
+                    essence_archetype: 'Test essence',
+                    persona_selection: 'Test persona',
+                    email: 'test@example.com',
+                    flow_version: '1.0.0',
+                    flow_completed: false
+                };
+                
+                const response = await fetch('/api/supabase', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ data: testData })
+                });
+                
+                const resultData = await response.json();
+                
+                if (response.ok) {
+                    result.innerHTML = `
+                        <div class="success">
+                            <h3>✅ Success!</h3>
+                            <p>Data successfully saved to Supabase!</p>
+                            <p><strong>Session ID:</strong> ${testData.session_id}</p>
+                            <p><strong>Message:</strong> ${resultData.message}</p>
+                            <p>Check your Supabase dashboard to see the new record.</p>
+                        </div>
+                    `;
+                } else {
+                    throw new Error(resultData.error || `HTTP ${response.status}`);
+                }
+                
+            } catch (error) {
+                result.innerHTML = `
+                    <div class="error">
+                        <h3>❌ Connection Failed</h3>
+                        <p><strong>Error:</strong> ${error.message}</p>
+                        <p>Make sure your Supabase table is set up correctly.</p>
+                    </div>
+                `;
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Test Supabase Connection';
+            }
+        }
+    </script>
+</body>
+</html>

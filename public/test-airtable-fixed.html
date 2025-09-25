@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Airtable Connection (Fixed)</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        button {
+            background: #5e17eb;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 0;
+        }
+        button:hover {
+            background: #4a0fb8;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: monospace;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        .warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Test Airtable Connection (Fixed)</h1>
+        <p>This will test if your app can save data to Airtable using environment variables.</p>
+        
+        <div class="warning">
+            <h3>⚠️ Before Testing:</h3>
+            <p>Make sure you've added these environment variables to Vercel:</p>
+            <ul>
+                <li><strong>AIRTABLE_API_KEY</strong> = your_airtable_api_key</li>
+                <li><strong>AIRTABLE_BASE_ID</strong> = applyNji0D8ewUx1a</li>
+                <li><strong>AIRTABLE_TABLE_ID</strong> = tbltHQRkX3ZgCksGu</li>
+            </ul>
+        </div>
+        
+        <button onclick="testConnection()" id="testBtn">Test Airtable Connection</button>
+        
+        <div id="result"></div>
+        
+        <div class="info">
+            <h3>📋 What this tests:</h3>
+            <ul>
+                <li>✅ Airtable API endpoint is working</li>
+                <li>✅ Environment variables are configured</li>
+                <li>✅ Data format matches your Airtable fields</li>
+                <li>✅ New record gets added to your base</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        async function testConnection() {
+            const btn = document.getElementById('testBtn');
+            const result = document.getElementById('result');
+            
+            btn.disabled = true;
+            btn.textContent = 'Testing...';
+            result.innerHTML = '';
+            
+            try {
+                const testData = {
+                    session_id: 'test_' + Date.now(),
+                    step: 'test_connection',
+                    step_index: 0,
+                    user_name: 'Test User',
+                    ambition_gap: 'Testing Airtable integration with environment variables',
+                    logical_reasons_list: 'This is a test entry',
+                    past_parallel_context: 'Test data',
+                    splinter_event_description: 'Test event',
+                    post_event_feeling: 'Test feeling',
+                    pre_splinter_identity: 'Test identity',
+                    splinter_identity_verdict: 'Test verdict',
+                    reclaim_consent: 'Test consent',
+                    protective_archetype: 'Test archetype',
+                    loop_acknowledged: 'Test acknowledgment',
+                    second_half_consent: 'Test consent 2',
+                    biology_understanding: 'Test understanding',
+                    essence_archetype_selection: 'Test essence',
+                    persona_selection: 'Test persona',
+                    email: 'test@example.com',
+                    completed_steps: ['test_step_1', 'test_step_2'],
+                    flow_version: '1.0.0',
+                    flow_completed: false,
+                    timestamp: new Date().toISOString()
+                };
+                
+                const response = await fetch('/api/airtable', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ data: testData })
+                });
+                
+                const resultData = await response.json();
+                
+                if (response.ok) {
+                    result.innerHTML = `
+                        <div class="success">
+                            <h3>✅ Success!</h3>
+                            <p>Data successfully saved to Airtable!</p>
+                            <p><strong>Session ID:</strong> ${testData.session_id}</p>
+                            <p><strong>Record ID:</strong> ${resultData.record_id}</p>
+                            <p><strong>Message:</strong> ${resultData.message}</p>
+                            <p>Check your Airtable base to see the new record.</p>
+                        </div>
+                    `;
+                } else {
+                    throw new Error(resultData.error || `HTTP ${response.status}`);
+                }
+                
+            } catch (error) {
+                result.innerHTML = `
+                    <div class="error">
+                        <h3>❌ Connection Failed</h3>
+                        <p><strong>Error:</strong> ${error.message}</p>
+                        <p>Make sure your Airtable environment variables are configured in Vercel.</p>
+                    </div>
+                `;
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Test Airtable Connection';
+            }
+        }
+    </script>
+</body>
+</html>

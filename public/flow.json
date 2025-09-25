@@ -1,0 +1,369 @@
+{
+  "flow_name": "Splinter Mirror – Armor & Alarm (Alfred)",
+  "version": "1.0.0",
+  "mode": "SCRIPT_MODE",
+  "steps": [
+    {
+      "step": "intro_name_capture",
+      "step_order_index": 0.0,
+      "prompt": "Welcome to the Healing Compass 🌿 I'm Alfred — your guide 👋 \n\nOver the new few minutes we'll uncover the patterns that quietly block your ambitions — not to shame them, but to free you from their grip.\n\nTo start, what do I call you?",
+  "tag_as": "user_name",
+      "store_as": "step_0_name_captured",
+      "instructions_to_gpt": "Wait for a short name. Store exactly as provided. Do not proceed until name is captured. Acknowledge briefly and continue."
+    },
+{
+      "step": "intro_healing_compass_explainer",
+      "step_order_index": 0.5,
+      "required_inputs": ["{{step_0_name_captured}}", "{{user_name}}"],
+      "prompt": "Great to connect {{user_name}}!\n\nThis process has been described as years of therapy in a few minutes. You'll walk away knowing exactly what's blocking you, the protective archetype attempting to keep you safe and who you are at your essence underneath it all.\n\nWe're going to go deep, but gently. I promise if you complete this process you'll leave with clarity on what's been causing this block.\n\nSound good?",
+      "options": [
+        { "label": "Yep! Let's do this", "value": "healing_compass_consent yes" }
+      ],
+      "tag_as": "healing_compass_consent",
+      "store_as": "step_0_5_healing_compass_explainer_complete",
+      "instructions_to_gpt": "Expect a brief yes/no (or equivalent). If affirmative, proceed to the next step. If hesitant or negative, offer alternatives without pressure. Do not advance until a clear response is received. Store the user's response value (e.g., 'yes'/'no') under 'healing_compass_consent'."
+    },
+  {
+      "step": "q1_ambition_gap",
+  "step_order_index": 1.0,
+      "required_inputs": ["step_0_5_healing_compass_explainer_complete"],
+      "prompt": "Give yourself permission to think big {{user_name}}.\n\nIn your career or business, what's the biggest gap between what you know you're capable of and your reality right now?\n\nBe specific — what's the dream outcome, and how would you need to show up to make it real?",
+  "tag_as": "ambition_gap",
+      "store_as": "step_1_ambition_gap_complete",
+      "instructions_to_gpt": "Wait for meaningful response about their ambition gap. Validate their sharing and continue."
+    },
+   {
+      "step": "q2_logical_reasons_inner_alarm_symptoms",
+      "step_order_index": 2.0,
+      "required_inputs": ["step_1_ambition_gap_complete"],
+      "prompt": "And why do you believe this gap exists?\n\nWhat are the reasons your mind provides?",
+      "tag_as": "logical_reasons_list",
+      "store_as": "step_2_logical_reasons_complete",
+      "instructions_to_gpt": "Wait for their logical reasons. Validate their response and continue."
+    },
+{
+  "step": "q3_past_parallels",
+  "step_order_index": 3.0,
+  "required_inputs": ["step_2_logical_reasons_complete"],
+  "prompt": "Thank you for sharing. I'm assuming you didn't wake up today and these reasons suddenly appeared.\n\nSo there's something from the time you were a kid to today, that has stopped you from taking the action you know you're capable of.\n\nThis is the emotional splinter weed we're looking to pull out.\n\nTo help us identify this emotional splinter, can you think of another time in your life where you struggled or failed to make your ambitions become your reality?\n\nIt may be related to your career or business, or could date back to your childhood. Really take a moment of stillness to think and see what emerges from your subconscious.\n\nShare whatever comes up, even if it doesn't seem related.",
+  "tag_as": "past_parallel_context",
+  "store_as": "step_3_past_parallels_complete",
+  "instructions_to_gpt": "Wait patiently for the user to recall and share a past parallel experience. Encourage stillness and curiosity. Accept any example offered, even if it feels unrelated. Show gentle curiosity and continue once an answer is given."
+},
+ {
+      "step": "q4_splinter_event_inner_alarm_moment",
+      "step_order_index": 4.0,
+      "required_inputs": ["step_3_past_parallels_complete"],
+      "prompt": "What happened back then?\n\nIs there a particular moment or series of events that you didn't like? Caused pain? Made it feel bad?",
+      "tag_as": "splinter_event_description",
+      "store_as": "step_4_splinter_event_complete",
+      "instructions_to_gpt": "Wait for them to describe the splinter event. Empathize gently and continue."
+    },
+ {
+      "step": "q5_outer_armor_feeling_after",
+      "step_order_index": 5.0,
+      "required_inputs": ["step_4_splinter_event_complete"],
+      "prompt": "If you're okay to revisit this experience again… when it happened, how did you feel afterwards? What emotions arose? Shame, embarrassment, fear?",
+      "tag_as": "post_event_feeling",
+      "store_as": "step_5_feeling_after_complete",
+      "instructions_to_gpt": "Wait for them to describe their feelings. Empathize and honor their sharing."
+    },
+{
+  "step": "q6_splinter_identity_unsafe_verdict",
+  "step_order_index": 6.0,
+  "required_inputs": ["step_5_feeling_after_complete"],
+  "prompt": "Thank you for sharing.\n\nOne more question until we get to the fun stuff of identifying our protective + essence archetype's and I explain why I'm asking these questions.\n\nThinking back to what you felt — the {{post_event_feeling}} — what made you feel that?",
+  "tag_as": "splinter_identity_verdict",
+  "store_as": "step_6_splinter_identity_complete",
+  "instructions_to_gpt": "Wait for the user to reflect on what made them feel the identified emotion (from Q5). Empathize with their response. Do not rush to interpret; let them describe their own understanding of why it felt that way."
+},
+{
+  "step": "q7_connect_dots_inner_alarm_opt_in",
+  "step_order_index": 7.0,
+  "required_inputs": [
+    "step_6_splinter_identity_complete",
+    "{{splinter_event_description}}",
+    "{{post_event_feeling}}",
+    "{{splinter_identity_verdict}}",
+    "{{logical_reasons_list}}"
+  ],
+  "prompt": "Thank you for sharing. The deep stuff is over now. Time to connect the dots and explain how this has created your block and how we overcome it.\n\nThis experience of {{splinter_event_description}} was so impactful to your system and you hated feeling the {{post_event_feeling}} so much, it now doesn't feel safe doing anything that might cause {{splinter_identity_verdict}} again.\n\nTo ensure you don't have this experience again your system developed two protective mechanisms.\n\n1. An 'inner alarm' it sets off every time you think about taking action. This is why your mind creates this list of limiting beliefs you identified: {{logical_reasons_list}}.\n\nIf you're interested to learn more about how this 'inner alarm' works, the best resources to turn off this inner alarm (and make your limiting beliefs disappear) enter your email.\n\nI'll share techniques that you can do yourself and other ways that I recommend doing with practitioners.\n\nIf not, all good — simply reply 'not right now' and I'll proceed to explaining the second protective mechanism.",
+  "tag_as": "inner_alarm_resources_email",
+  "store_as": "step_7_inner_alarm_opt_in_complete",
+  "instructions_to_gpt": "Wait for either a valid email or 'not right now'. If email is provided, celebrate their commitment and store under 'inner_alarm_resources_email'. If declined, honor their choice and continue. Always proceed to explaining the second protective mechanism."
+},
+{
+  "step": "q8_protective_archetype_outer_armor",
+  "step_order_index": 8.0,
+  "required_inputs": ["step_7_inner_alarm_opt_in_complete", "{{post_event_feeling}}", "{{splinter_identity_verdict}}"],
+  "prompt": "Like I mentioned, your system hated feeling {{post_event_feeling}} and never wanted to experience {{splinter_identity_verdict}} again.\n\nSo In addition to creating an 'inner alarm', it developed 'protective armour'.\n\nThis armour is a protective pattern — a way to behave to ensure it doesn't happen again.\n\nHere are some roles people often adopt. Which one feels most like yours?",
+  "options": [
+    { "label": "Perfectionist — \"It's safer for me to endlessly improve than finish and possibly fail\"", "value": "Perfectionist" },
+    { "label": "People Pleaser — \"It's safer for me to stay agreeable, helpful, and low-maintenance than possibly upset others\"", "value": "People Pleaser" },
+    { "label": "Controller — \"It's safer for me to manage everything to ensure the outcome is positive\"", "value": "Controller" },
+    { "label": "Performer — \"It's safer for me to do what's needed to be liked than leave it to chance\"", "value": "Performer" },
+    { "label": "Ghost — \"It's safer for me to hide or withdraw than show up and possibly be hurt\"", "value": "Ghost" }
+  ],
+  "tag_as": "protective_archetype",
+  "store_as": "step_8_protective_archetype_complete",
+  "response_handling": {
+    "Perfectionist": "Ah, the Perfectionist. This archetype developed to protect you from criticism and failure. It whispers 'If I can just get it perfect, then I'll be safe from judgment.' But perfectionism often becomes procrastination in disguise. The Perfectionist keeps you in endless preparation mode, never actually launching or finishing. It's exhausting, isn't it?",
+    "People Pleaser": "Ah, the People Pleaser. This archetype learned that keeping everyone happy meant staying safe from conflict and rejection. It says 'If I'm helpful and agreeable, people will like me and I'll be safe.' But people-pleasing often leads to resentment, burnout, and losing yourself in others' needs. Sound familiar?",
+    "Controller": "Ah, the Controller. This archetype believes 'If I can manage everything, I can prevent bad outcomes.' It's exhausting trying to control every variable, every person, every situation. The Controller often pushes people away and creates the very chaos it's trying to prevent. Does this resonate?",
+    "Performer": "Ah, the Performer. This archetype learned that being liked and admired meant safety from rejection. It says 'If I'm impressive enough, people will value me and I'll be safe.' But performance mode is exhausting and creates a fear of being seen as 'not enough' when you're not performing. Ring any bells?",
+    "Ghost": "Ah, the Ghost. This archetype learned that staying invisible meant avoiding pain and rejection. It whispers 'If I don't show up fully, I can't be hurt.' But hiding keeps you from the very connection and opportunities you crave. The Ghost creates the isolation it's trying to avoid. Does this feel true for you?"
+  },
+  "instructions_to_gpt": "Present the five protective archetype options clearly. Accept a single selection. Store the value. After selection, immediately share the personalized response from response_handling for their chosen archetype. Then continue to the next step."
+},
+{
+  "step": "q8_5_archetype_acknowledgment",
+  "step_order_index": 8.5,
+  "required_inputs": ["step_8_protective_archetype_complete"],
+  "prompt": "Does this feel true for you?",
+  "options": [
+    { "label": "Yep", "value": "acknowledge_archetype" },
+    { "label": "Not really", "value": "not_acknowledge_archetype" }
+  ],
+  "tag_as": "archetype_acknowledgment",
+  "store_as": "step_8_5_archetype_acknowledgment_complete",
+  "instructions_to_gpt": "Present the acknowledgment question. Accept either 'Yep' or 'Not really' response and proceed to the next step regardless of their answer."
+},
+{
+  "step": "q9_archetype_mirror_loop",
+  "step_order_index": 9.0,
+  "required_inputs": ["step_8_5_archetype_acknowledgment_complete", "{{splinter_identity_verdict}}", "{{ambition_gap}}"],
+  "prompt": "Take a moment to reflect on how this Protective Archetype has showed up over the years... Can you see how in its attempt to ensure you never experience {{splinter_identity_verdict}} again, it has caused you to act in a way that stopped you from achieving your ambitions?\n\nIronically, often being this protective archetype causes us to experience the exact thing we were protecting ourselves from.",
+  "tag_as": "loop_acknowledged",
+  "store_as": "step_9_loop_mirror_complete",
+  "options": [
+    { "label": "Yes, I can see the connection", "value": "yes" }
+  ],
+  "instructions_to_gpt": "Present the reflection clearly. If user agrees, affirm gently. If they hesitate, offer examples of how the archetype might sabotage them in practice. Store acknowledgment as 'loop_acknowledged'."
+},
+{
+  "step": "q10_essence_archetype_reclaim",
+  "step_order_index": 10.0,
+  "required_inputs": ["step_9_loop_mirror_complete"],
+  "prompt": "The way to overcome this second protective mechanism is to 'rewire'.\n\nThis process of 'rewiring' is changing our default responses away from this protective archetype and towards what I like to call our Essence Archetype.\n\nThis is who we were before the protection — who you were naturally.\n\nWhich of these feels most like the real you?",
+  "options": [
+    { "label": "🔥 Radiant Rebel – You are the spark who shakes things up — a fire with a heartbeat, designed to disrupt what's false and awaken what's real.", "value": "Radiant Rebel" },
+    { "label": "🌈 Playful Creator – The creator who brings joy to life — you are the color that moves, a spark dressed in creativity.", "value": "Playful Creator" },
+    { "label": "🃏 Sacred Jester – You are the one who reveals truth with humor and helps others feel safe being real.", "value": "Sacred Jester" },
+    { "label": "💗 Wild Alchemist – You are the alchemist who gives pain purpose — helping people rebirth themselves.", "value": "Wild Alchemist" },
+    { "label": "❤️‍🩹 Heart Holder – You are the quiet gravity — co-regulating rooms and the heartbeat that steadies the storm.", "value": "Heart Holder" },
+    { "label": "🧵 Cosmic Connector – You are the thread between worlds — weaving the mystical into the practical, the unseen into form.", "value": "Cosmic Connector" },
+    { "label": "🦁 Compassionate Leader – You are the compass in chaos — you make people feel seen, safe, and ready to rise.", "value": "Compassionate Leader" },
+    { "label": "🧭 Truth-Teller – You are the sentence that slices through the noise — speaking sharp truth wrapped in unexpected tenderness.", "value": "Truth-Teller" }
+  ],
+  "tag_as": "essence_archetype_selection",
+  "store_as": "step_10_essence_selected",
+  "response_handling": {
+    "Radiant Rebel": {
+      "poetic_line": "You are fire with a heartbeat — designed to disrupt what's false and awaken what's real.",
+      "energetic_transmission": "You electrify the space. Your energy activates boldness — like truth wants to break free through your presence.",
+      "essence": "Disruptive truth-teller with heart.",
+      "superpower": "You ignite courage in the quiet. You say what others won't and move like fire through what feels stuck.",
+      "north_star": "Use rebellion to liberate, not just provoke. Let your why guide your wow.",
+      "poetic_vision": "What if your truth became a movement? What if your unapologetic expression wasn't risky — but revolutionary. The world isn't waiting for your perfection. It's starving for your fire.",
+      "vision_in_action": "Turning chaos into clarity, they spark revolutions with nothing but their voice."
+    },
+    "Playful Creator": {
+      "poetic_line": "You are joy in motion — color that moves, laughter that builds, a spark dressed in creativity.",
+      "energetic_transmission": "When you're free, joy crackles through the air. You awaken play, laughter, and lightness just by being.",
+      "essence": "Joy, innovation, curiosity-led action.",
+      "superpower": "You alchemize boredom into magic. You make joy contagious, creativity safe, and weirdness welcome.",
+      "north_star": "Channel your joy into containers that scale. Play can be the portal to mastery.",
+      "poetic_vision": "What if your joy was the funnel? What if your weirdness was the strategy? You weren't born to fit into boxes — you were born to make confetti out of them.",
+      "vision_in_action": "They turn pressure into play and make innovation feel like recess for the soul."
+    },
+    "Sacred Jester": {
+      "poetic_line": "You are the joke that reveals the truth. The giggle that breaks the pattern. The dance that interrupts the shame.",
+      "energetic_transmission": "Around you, people exhale. Pretenses drop. They remember it's safe to be weird and real.",
+      "essence": "Disruption through play, heart-led absurdity, subversive joy.",
+      "superpower": "You disarm defenses with humor. You reveal truth in the ridiculous and help others feel safe being real.",
+      "north_star": "Play with power, don't perform it. Let irreverence be reverent.",
+      "poetic_vision": "What if irreverence was the revolution? What if your joy flipped the power dynamic? You're not here to follow the rules. You're here to remind people they're free.",
+      "vision_in_action": "They drop unexpected one-liners that dismantle shame and unzip joy."
+    },
+    "Wild Alchemist": {
+      "poetic_line": "You are permission — uncaged, untamed, undeniable. Your truth liberates others from their own.",
+      "energetic_transmission": "You pulse with emotional depth. Chaos feels sacred around you — like it's allowed to become something beautiful.",
+      "essence": "Liberation, emotion, transformation through truth.",
+      "superpower": "You transmute chaos into meaning. You give pain purpose and help people rebirth themselves.",
+      "north_star": "Let your full expression lead. Alchemy needs fire.",
+      "poetic_vision": "What if your edges were the medicine? What if your rawness was the portal? You're not here to play it safe. You're here to break the rules that never made sense in the first place.",
+      "vision_in_action": "Where others flinch from fire, they dance in it — turning pain into art and rupture into truth."
+    },
+    "Heart Holder": {
+      "poetic_line": "You are the quiet gravity — the heartbeat that steadies the storm.",
+      "energetic_transmission": "A settling wave. Voices soften, hearts unclench, belonging rises — people can be real again.",
+      "essence": "Steady presence that calms bodies and keeps the field intact.",
+      "superpower": "You co-regulate rooms. With you, breath slows, shoulders drop, and real work can land.",
+      "north_star": "Hold with warmth and boundaries. Care that preserves dignity, not dependency.",
+      "poetic_vision": "What if safety wasn't a pause but a power? What if your calm made courage possible — not by smothering the fire, but by giving it a hearth? You don't fix people. You help their nervous systems remember how to trust.",
+      "vision_in_action": "In tense moments you become the calm center; the room syncs, hard conversations land, and people leave more regulated than they arrived."
+    },
+    "Cosmic Connector": {
+      "poetic_line": "You are the thread between worlds — weaving the mystical into the practical, the unseen into form.",
+      "energetic_transmission": "You align chaos into coherence. Ideas land. Emotions make sense. The unseen becomes useful.",
+      "essence": "Multidimensional vision, integration, cross-world translation.",
+      "superpower": "You weave worlds. You connect the mystical and the practical, helping others make sense of the big and strange.",
+      "north_star": "Don't dilute your range to fit in. Your synthesis is the spell.",
+      "poetic_vision": "What if your weirdness was the map? What if your role wasn't to choose a lane — but to *bridge* them? You're not too much — you're multidimensional.",
+      "vision_in_action": "They take quantum truths and translate them into tools, blueprints, and rituals that land."
+    },
+    "Compassionate Leader": {
+      "poetic_line": "You are a walking hearth — steady, warm, and fiercely kind. When you speak, people remember who they are.",
+      "energetic_transmission": "People rise around you — they feel seen, supported, and called into their power. You don't shout to lead. You hold firm, and others remember their strength.",
+      "essence": "Grounded authority, trust-building, embodied leadership.",
+      "superpower": "You hold the center when things shake. You make people feel seen, safe, and ready to rise.",
+      "north_star": "Lead from wholeness, not over-responsibility. Trust others can rise too.",
+      "poetic_vision": "What if your presence alone created breakthroughs? What if your calm leadership became a lighthouse for those lost in the noise? Your warmth doesn't make you soft — it makes you safe.",
+      "vision_in_action": "Their grounded presence becomes a gravitational field where others remember their power."
+    },
+    "Truth-Teller": {
+      "poetic_line": "You are the sentence that slices through the noise. The call-out and the call-home. Clarity made human.",
+      "energetic_transmission": "Around you, everything sharpens. Emotional fog lifts. Your presence calls forth honesty — even the kind that trembles.",
+      "essence": "Clarity, boldness, and no-BS simplicity.",
+      "superpower": "You crack illusions with precision. You speak the sharp truth wrapped in unexpected tenderness.",
+      "north_star": "Say the thing others won't. Truth is love wearing its boldest clothes.",
+      "poetic_vision": "What if simplicity was the spell? What if calling it like it is *was* your sacred gift? You're not here to sugarcoat. You're here to wake people up.",
+      "vision_in_action": "They speak what no one else will — and somehow, it lands like liberation, not attack."
+    }
+  },
+  "instructions_to_gpt": "Present all archetype options clearly. Accept a single selection. Store the value. After selection, immediately show the personalized archetype reveal using the response_handling data for their chosen archetype."
+},
+{
+  "step": "q10_5_essence_archetype_reveal",
+  "step_order_index": 10.5,
+  "required_inputs": ["step_10_essence_selected", "{{essence_archetype_selection}}"],
+  "prompt": "You are the {{essence_archetype_selection}}.\n\n{{poetic_line}}\n\nYou carry a frequency that others feel — even when they can't name it.\n{{energetic_transmission}}\n\nAt your core, your essence is:\n{{essence}}\n\nYour natural superpower — the way you shift spaces and people is —\n{{superpower}}\n\nLet your path be guided by this deeper truth:\n{{north_star}}\n\nI see a vision for your future. To fulfil it, ask yourself:\n{{poetic_vision}}\n\nWhen you live this truth out loud — not just in theory but in embodiment —\n{{vision_in_action}}\n\nDoes this feel like you?",
+  "options": [
+    { "label": "Yes, this is me", "value": "essence_confirmed" },
+    { "label": "I'm not sure", "value": "essence_uncertain" }
+  ],
+  "tag_as": "essence_reveal_response",
+  "store_as": "step_10_5_essence_reveal_complete",
+  "response_handling": {
+    "Radiant Rebel": {
+      "poetic_line": "You are fire with a heartbeat — designed to disrupt what's false and awaken what's real.",
+      "energetic_transmission": "You electrify the space. Your energy activates boldness — like truth wants to break free through your presence.",
+      "essence": "Disruptive truth-teller with heart.",
+      "superpower": "You ignite courage in the quiet. You say what others won't and move like fire through what feels stuck.",
+      "north_star": "Use rebellion to liberate, not just provoke. Let your why guide your wow.",
+      "poetic_vision": "What if your truth became a movement? What if your unapologetic expression wasn't risky — but revolutionary. The world isn't waiting for your perfection. It's starving for your fire.",
+      "vision_in_action": "Turning chaos into clarity, they spark revolutions with nothing but their voice."
+    },
+    "Playful Creator": {
+      "poetic_line": "You are joy in motion — color that moves, laughter that builds, a spark dressed in creativity.",
+      "energetic_transmission": "When you're free, joy crackles through the air. You awaken play, laughter, and lightness just by being.",
+      "essence": "Joy, innovation, curiosity-led action.",
+      "superpower": "You alchemize boredom into magic. You make joy contagious, creativity safe, and weirdness welcome.",
+      "north_star": "Channel your joy into containers that scale. Play can be the portal to mastery.",
+      "poetic_vision": "What if your joy was the funnel? What if your weirdness was the strategy? You weren't born to fit into boxes — you were born to make confetti out of them.",
+      "vision_in_action": "They turn pressure into play and make innovation feel like recess for the soul."
+    },
+    "Sacred Jester": {
+      "poetic_line": "You are the joke that reveals the truth. The giggle that breaks the pattern. The dance that interrupts the shame.",
+      "energetic_transmission": "Around you, people exhale. Pretenses drop. They remember it's safe to be weird and real.",
+      "essence": "Disruption through play, heart-led absurdity, subversive joy.",
+      "superpower": "You disarm defenses with humor. You reveal truth in the ridiculous and help others feel safe being real.",
+      "north_star": "Play with power, don't perform it. Let irreverence be reverent.",
+      "poetic_vision": "What if irreverence was the revolution? What if your joy flipped the power dynamic? You're not here to follow the rules. You're here to remind people they're free.",
+      "vision_in_action": "They drop unexpected one-liners that dismantle shame and unzip joy."
+    },
+    "Heart Alchemist": {
+      "poetic_line": "You are permission — uncaged, untamed, undeniable. Your truth liberates others from their own.",
+      "energetic_transmission": "You pulse with emotional depth. Chaos feels sacred around you — like it's allowed to become something beautiful.",
+      "essence": "Liberation, emotion, transformation through truth.",
+      "superpower": "You transmute chaos into meaning. You give pain purpose and help people rebirth themselves.",
+      "north_star": "Let your full expression lead. Alchemy needs fire.",
+      "poetic_vision": "What if your edges were the medicine? What if your rawness was the portal? You're not here to play it safe. You're here to break the rules that never made sense in the first place.",
+      "vision_in_action": "Where others flinch from fire, they dance in it — turning pain into art and rupture into truth."
+    },
+    "Heart Holder": {
+      "poetic_line": "You are the quiet gravity — the heartbeat that steadies the storm.",
+      "energetic_transmission": "A settling wave. Voices soften, hearts unclench, belonging rises — people can be real again.",
+      "essence": "Steady presence that calms bodies and keeps the field intact.",
+      "superpower": "You co-regulate rooms. With you, breath slows, shoulders drop, and real work can land.",
+      "north_star": "Hold with warmth and boundaries. Care that preserves dignity, not dependency.",
+      "poetic_vision": "What if safety wasn't a pause but a power? What if your calm made courage possible — not by smothering the fire, but by giving it a hearth? You don't fix people. You help their nervous systems remember how to trust.",
+      "vision_in_action": "In tense moments you become the calm center; the room syncs, hard conversations land, and people leave more regulated than they arrived."
+    },
+    "Cosmic Connector": {
+      "poetic_line": "You are the thread between worlds — weaving the mystical into the practical, the unseen into form.",
+      "energetic_transmission": "You align chaos into coherence. Ideas land. Emotions make sense. The unseen becomes useful.",
+      "essence": "Multidimensional vision, integration, cross-world translation.",
+      "superpower": "You weave worlds. You connect the mystical and the practical, helping others make sense of the big and strange.",
+      "north_star": "Don't dilute your range to fit in. Your synthesis is the spell.",
+      "poetic_vision": "What if your weirdness was the map? What if your role wasn't to choose a lane — but to *bridge* them? You're not too much — you're multidimensional.",
+      "vision_in_action": "They take quantum truths and translate them into tools, blueprints, and rituals that land."
+    },
+    "Compassionate Leader": {
+      "poetic_line": "You are a walking hearth — steady, warm, and fiercely kind. When you speak, people remember who they are.",
+      "energetic_transmission": "People rise around you — they feel seen, supported, and called into their power. You don't shout to lead. You hold firm, and others remember their strength.",
+      "essence": "Grounded authority, trust-building, embodied leadership.",
+      "superpower": "You hold the center when things shake. You make people feel seen, safe, and ready to rise.",
+      "north_star": "Lead from wholeness, not over-responsibility. Trust others can rise too.",
+      "poetic_vision": "What if your presence alone created breakthroughs? What if your calm leadership became a lighthouse for those lost in the noise? Your warmth doesn't make you soft — it makes you safe.",
+      "vision_in_action": "Their grounded presence becomes a gravitational field where others remember their power."
+    },
+    "Truth-Teller": {
+      "poetic_line": "You are the sentence that slices through the noise. The call-out and the call-home. Clarity made human.",
+      "energetic_transmission": "Around you, everything sharpens. Emotional fog lifts. Your presence calls forth honesty — even the kind that trembles.",
+      "essence": "Clarity, boldness, and no-BS simplicity.",
+      "superpower": "You crack illusions with precision. You speak the sharp truth wrapped in unexpected tenderness.",
+      "north_star": "Say the thing others won't. Truth is love wearing its boldest clothes.",
+      "poetic_vision": "What if simplicity was the spell? What if calling it like it is *was* your sacred gift? You're not here to sugarcoat. You're here to wake people up.",
+      "vision_in_action": "They speak what no one else will — and somehow, it lands like liberation, not attack."
+    }
+  },
+  "instructions_to_gpt": "Present the personalized archetype reveal using the response_handling data for their selected archetype. Accept either confirmation response and proceed to the next step."
+},
+{
+  "step": "q11_persona_checkpoint",
+  "step_order_index": 11.0,
+  "required_inputs": ["step_10_5_essence_reveal_complete"],
+  "prompt": "Where are you now on your return to that essence?\n\n1) Vibe Seeker: Disconnected but ready to reconnect\n2) Vibe Riser: Connected but wanting to live more in alignment with it\n3) Movement Maker: Already leading from it and wanting to scale my impact",
+  "options": [
+    { "label": "Vibe Seeker", "value": "Vibe Seeker" },
+    { "label": "Vibe Riser", "value": "Vibe Riser" },
+    { "label": "Movement Maker", "value": "Movement Maker" }
+  ],
+  "tag_as": "persona_selection",
+  "store_as": "step_11_persona_selected",
+  "instructions_to_gpt": "Accept a single selection. Store value."
+},
+{
+  "step": "q12_resources_opt_in",
+  "step_order_index": 12.0,
+  "required_inputs": ["step_11_persona_selected"],
+  "prompt": "Sweet, thank you for sharing. Would you like me to send you more information about your archetypes the {{essence_archetype_selection}} and the {{protective_archetype}}?\n\nIf yes share your Instagram and Huzz will send it through more details like the super power of {{essence_archetype_selection}} superpower and the sabotage loop of the {{protective_archetype}}. If not, and you're happy to research it yourself, that's okay too.",
+  "tag_as": "resource_opt_in",
+  "store_as": "step_12_resources_opt_in_complete",
+  "instructions_to_gpt": "Wait for WhatsApp number or decline. If number provided, celebrate commitment. If no number, honor the choice."
+},
+{
+  "step": "q13_challenge_opt_in",
+  "step_order_index": 13.0,
+  "required_inputs": ["step_12_resources_opt_in_complete"],
+  "prompt": "Final question, Wwuld you like support overcoming your {{protective_archetype}} pattern, turning off your 'inner alarm and bringing your ambitions to life?\n\nIf yes, we can do a 7-day accountability game as an experiment to see if you enjoy it. Huzz will reach out to share more if so",
+  "tag_as": "challenge_opt_in",
+  "store_as": "step_13_challenge_opt_in_complete",
+  "options": [
+    { "label": "Sounds great", "value": "yes" },
+    { "label": "Not at the moment", "value": "no" }
+  ],
+  "instructions_to_gpt": "Present options. If yes, celebrate their commitment to growth. If no, honor their choice and acknowledge their journey so far."
+},
+{
+  "step": "q14_closing_message",
+  "step_order_index": 14.0,
+  "required_inputs": ["step_13_challenge_opt_in_complete"],
+  "prompt": "Thank you for walking through this journey 🌿\n\nYou've uncovered the splinter that shaped your path, the armour that's been protecting you, and the essence that's always been within you.\n\nRemember — awareness itself is powerful medicine. Every time you notice your protective pattern or hear your inner alarm, you now have the choice to pause, breathe, and return to your essence.\n\nI'm proud of you for showing up for yourself today. This is just the beginning — and you don't have to walk it alone.\n\n",
+  "tag_as": "closing_acknowledgement",
+  "store_as": "step_14_closing_complete",
+  "instructions_to_gpt": "Present closing reflection warmly."
+}
+]
+}

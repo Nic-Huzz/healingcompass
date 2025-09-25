@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Google Sheets Connection</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        button {
+            background: #5e17eb;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+        button:hover {
+            background: #4a0fb8;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        .warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        .debug-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Debug Google Sheets Connection</h1>
+        <p>Let's figure out what's going wrong with the Google Sheets integration.</p>
+        
+        <div class="debug-section">
+            <h3>📋 Test 1: Basic API Connection</h3>
+            <p>Test if the Google Sheets API is accessible with your key.</p>
+            <button onclick="testBasicAPI()" id="test1Btn">Test Basic API</button>
+            <div id="result1"></div>
+        </div>
+
+        <div class="debug-section">
+            <h3>📋 Test 2: Sheet Read Access</h3>
+            <p>Test if we can read from your Google Sheet.</p>
+            <button onclick="testSheetRead()" id="test2Btn">Test Sheet Read</button>
+            <div id="result2"></div>
+        </div>
+
+        <div class="debug-section">
+            <h3>📋 Test 3: Sheet Write Access</h3>
+            <p>Test if we can write to your Google Sheet.</p>
+            <button onclick="testSheetWrite()" id="test3Btn">Test Sheet Write</button>
+            <div id="result3"></div>
+        </div>
+
+        <div class="debug-section">
+            <h3>📋 Test 4: Our API Endpoint</h3>
+            <p>Test our serverless function directly.</p>
+            <button onclick="testOurAPI()" id="test4Btn">Test Our API</button>
+            <div id="result4"></div>
+        </div>
+
+        <div class="info">
+            <h3>🔧 Debugging Info:</h3>
+            <ul>
+                <li><strong>Sheet ID:</strong> 1jzbvD99PtRIY5VN6My4W1hamu132mrvSmyFfJJoujvY</li>
+                <li><strong>API Key:</strong> AIzaSyBWE7_B_C9BPpQYA3wZd_e1lyoKI0kaFrI</li>
+                <li><strong>Expected Headers:</strong> Timestamp, Session ID, Step, User Name, etc.</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        const API_KEY = 'AIzaSyBWE7_B_C9BPpQYA3wZd_e1lyoKI0kaFrI';
+        const SHEET_ID = '1jzbvD99PtRIY5VN6My4W1hamu132mrvSmyFfJJoujvY';
+
+        async function testBasicAPI() {
+            const btn = document.getElementById('test1Btn');
+            const result = document.getElementById('result1');
+            
+            btn.disabled = true;
+            btn.textContent = 'Testing...';
+            result.innerHTML = '';
+            
+            try {
+                // Test basic API access
+                const response = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}?key=${API_KEY}`);
+                const data = await response.json();
+                
+                if (response.ok) {
+                    result.innerHTML = `<div class="success">✅ API Key works!<br>Sheet Title: ${data.properties.title}</div>`;
+                } else {
+                    result.innerHTML = `<div class="error">❌ API Error: ${data.error?.message || 'Unknown error'}</div>`;
+                }
+            } catch (error) {
+                result.innerHTML = `<div class="error">❌ Network Error: ${error.message}</div>`;
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Test Basic API';
+            }
+        }
+
+        async function testSheetRead() {
+            const btn = document.getElementById('test2Btn');
+            const result = document.getElementById('result2');
+            
+            btn.disabled = true;
+            btn.textContent = 'Testing...';
+            result.innerHTML = '';
+            
+            try {
+                // Test reading from sheet
+                const response = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/A1:U1?key=${API_KEY}`);
+                const data = await response.json();
+                
+                if (response.ok) {
+                    result.innerHTML = `<div class="success">✅ Can read sheet!<br>Headers: ${JSON.stringify(data.values?.[0] || [])}</div>`;
+                } else {
+                    result.innerHTML = `<div class="error">❌ Read Error: ${data.error?.message || 'Unknown error'}</div>`;
+                }
+            } catch (error) {
+                result.innerHTML = `<div class="error">❌ Network Error: ${error.message}</div>`;
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Test Sheet Read';
+            }
+        }
+
+        async function testSheetWrite() {
+            const btn = document.getElementById('test3Btn');
+            const result = document.getElementById('result3');
+            
+            btn.disabled = true;
+            btn.textContent = 'Testing...';
+            result.innerHTML = '';
+            
+            try {
+                // Test writing to sheet
+                const testData = [
+                    [new Date().toISOString(), 'test_session', 'debug_test', 'Debug User', 'Test data']
+                ];
+                
+                const response = await fetch(
+                    `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/A:U:append?valueInputOption=RAW&key=${API_KEY}`,
+                    {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            values: testData
+                        })
+                    }
+                );
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    result.innerHTML = `<div class="success">✅ Can write to sheet!<br>Updated: ${data.updatedRange}</div>`;
+                } else {
+                    result.innerHTML = `<div class="error">❌ Write Error: ${data.error?.message || 'Unknown error'}<br>Status: ${response.status}</div>`;
+                }
+            } catch (error) {
+                result.innerHTML = `<div class="error">❌ Network Error: ${error.message}</div>`;
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Test Sheet Write';
+            }
+        }
+
+        async function testOurAPI() {
+            const btn = document.getElementById('test4Btn');
+            const result = document.getElementById('result4');
+            
+            btn.disabled = true;
+            btn.textContent = 'Testing...';
+            result.innerHTML = '';
+            
+            try {
+                const testData = {
+                    session_id: 'debug_test_' + Date.now(),
+                    step: 'debug_test',
+                    user_name: 'Debug User',
+                    email: 'debug@test.com',
+                    flow_completed: false
+                };
+                
+                const response = await fetch('/api/google-sheets', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ data: testData })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    result.innerHTML = `<div class="success">✅ Our API works!<br>Message: ${data.message}</div>`;
+                } else {
+                    result.innerHTML = `<div class="error">❌ Our API Error: ${data.error || 'Unknown error'}<br>Details: ${data.details || 'No details'}</div>`;
+                }
+            } catch (error) {
+                result.innerHTML = `<div class="error">❌ Network Error: ${error.message}</div>`;
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Test Our API';
+            }
+        }
+    </script>
+</body>
+</html>

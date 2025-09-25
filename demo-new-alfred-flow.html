@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alfred Flow Demo - New Structure</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f8f9fa;
+        }
+        .container {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #5e17eb;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .flow-overview {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        .step {
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+        .step:hover {
+            border-color: #5e17eb;
+            box-shadow: 0 4px 16px rgba(94, 23, 235, 0.1);
+        }
+        .step-number {
+            background: #5e17eb;
+            color: white;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+        .step-title {
+            font-weight: 600;
+            color: #5e17eb;
+            margin-bottom: 10px;
+        }
+        .step-prompt {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-style: italic;
+        }
+        .step-options {
+            background: #fff3cd;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+        .step-data {
+            background: #d1ecf1;
+            padding: 10px;
+            border-radius: 6px;
+            font-size: 14px;
+            color: #0c5460;
+        }
+        .new-feature {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            padding: 10px;
+            border-radius: 6px;
+            margin-top: 10px;
+        }
+        .new-feature::before {
+            content: "🆕 ";
+            font-weight: bold;
+        }
+        .variable {
+            background: #ffdd27;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .summary {
+            background: linear-gradient(135deg, #5e17eb 0%, #7c3aed 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧭 Alfred Flow Demo - New Structure</h1>
+        
+        <div class="flow-overview">
+            <h3>📋 Flow Overview</h3>
+            <p><strong>Flow Name:</strong> Splinter Mirror – Armor & Alarm (Alfred)</p>
+            <p><strong>Total Steps:</strong> 16 steps (0-15)</p>
+            <p><strong>New Features:</strong> Enhanced variable interpolation, Alfred's voice, new data collection fields</p>
+        </div>
+
+        <div class="step">
+            <div class="step-number">0</div>
+            <div class="step-title">Name Capture</div>
+            <div class="step-prompt">"Welcome to the Healing Compass 🌿 I'm Alfred — your guide 👋 Over the new few minutes we'll uncover the patterns that quietly block your ambitions — not to shame them, but to free you from their grip. To start, what do I call you?"</div>
+            <div class="step-data"><strong>Data Field:</strong> user_name</div>
+        </div>
+
+        <div class="step">
+            <div class="step-number">0.5</div>
+            <div class="step-title">Healing Compass Explainer</div>
+            <div class="step-prompt">"Great to connect <span class="variable">{{user_name}}</span>! Think of yourself like a garden where a weed has grown in your soil. This weed is what I like to call an 'emotional splinter'. Over the next few minutes we will spot it, pull it out and plant something new. Sound good?"</div>
+            <div class="step-options"><strong>Options:</strong> "Yep! Let's do this"</div>
+            <div class="step-data"><strong>Data Field:</strong> healing_compass_consent</div>
+            <div class="new-feature">Enhanced variable interpolation with {{user_name}}</div>
+        </div>
+
+        <div class="step">
+            <div class="step-number">1</div>
+            <div class="step-title">Ambition Gap</div>
+            <div class="step-prompt">"Give yourself permission to think big <span class="variable">{{user_name}}</span>. In your career or business, what's the biggest gap between what you know you're capable of and your reality right now? Be specific — what's the dream outcome, and how would you need to show up to make it real?"</div>
+            <div class="step-data"><strong>Data Field:</strong> ambition_gap</div>
+        </div>
+
+        <div class="step">
+            <div class="step-number">2</div>
+            <div class="step-title">Logical Reasons</div>
+            <div class="step-prompt">"And why do you believe this gap exists? What are the reasons your mind provides?"</div>
+            <div class="step-data"><strong>Data Field:</strong> logical_reasons_list</div>
+        </div>
+
+        <div class="step">
+            <div class="step-number">3</div>
+            <div class="step-title">Past Parallels</div>
+            <div class="step-prompt">"Thank you for sharing. I'm assuming you didn't wake up today and these reasons suddenly appeared. So there's something from the time you were a kid to today, that has stopped you from taking the action you know you're capable of. This is the emotional splinter weed we're looking to pull out. To help us identify this emotional splinter, can you think of another time in your life where you struggled or failed to make your ambitions become your reality?"</div>
+            <div class="step-data"><strong>Data Field:</strong> past_parallel_context</div>
+        </div>
+
+        <div class="step">
+            <div class="step-number">4</div>
+            <div class="step-title">Splinter Event</div>
+            <div class="step-prompt">"What happened back then? Is there a particular moment or series of events that you didn't like? Caused pain? Made it feel bad?"</div>
+            <div class="step-data"><strong>Data Field:</strong> splinter_event_description</div>
+        </div>
+
+        <div class="step">
+            <div class="step-number">5</div>
+            <div class="step-title">Post-Event Feelings</div>
+            <div class="step-prompt">"If you're okay to revisit this experience again… when it happened, how did you feel afterwards? What emotions arose? Shame, embarrassment, fear?"</div>
+            <div class="step-data"><strong>Data Field:</strong> post_event_feeling</div>
+        </div>
+
+        <div class="step">
+            <div class="step-number">6</div>
+            <div class="step-title">Splinter Identity</div>
+            <div class="step-prompt">"Thank you for sharing. I believe as kids we're these carefree beings full of confidence about what's possible. But as we grow up, we have experiences that convince us otherwise. They cause us to doubt ourselves. They make taking action feel unsafe. I believe this moment you identified is one of those moments. Thinking back to what you felt — the <span class="variable">{{post_event_feeling}}</span> — what made you feel that?"</div>
+            <div class="step-data"><strong>Data Field:</strong> splinter_identity_verdict</div>
+            <div class="new-feature">Dynamic variable interpolation with {{post_event_feeling}}</div>
+        </div>
+
+        <div class="step">
+            <div class="step-number">7</div>
+            <div class="step-title">Biology Lesson</div>
+            <div class="step-prompt">"Can I let you in on a secret about human biology that's a little bit crazy once you realise? Quick biology lesson: • Your emotions are processed by your amygdala (an old part of the brain). • Your thoughts are processed by your prefrontal cortex (a new part of the brain). • They don't speak the same language. It's like the amygdala speaks French (emotions) and your prefrontal cortex speaks Chinese (words). So when your amygdala feels unsafe… your prefrontal cortex doesn't know the real reason, so it does its best to guess. Your answer — <span class="variable">{{logical_reasons_list}}</span> — is that best guess. But the truth is it's this experience of <span class="variable">{{splinter_event_description}}</span>. Your amygdala hated feeling the <span class="variable">{{post_event_feeling}}</span> so much, it now doesn't feel safe doing anything that might cause <span class="variable">{{splinter_identity_verdict}}</span> again. It sets off an 'inner alarm' every time you think about taking action. Your mind then justifies that feeling through logical reasons like <span class="variable">{{logical_reasons_list}}</span>. Does this make sense?"</div>
+            <div class="step-options"><strong>Options:</strong> "Yep, makes sense!"</div>
+            <div class="step-data"><strong>Data Field:</strong> biology_acknowledgement</div>
+            <div class="new-feature">Complex variable interpolation with multiple {{variables}}</div>
+        </div>
+
+        <div class="step">
+            <div class="step-number">8</div>
+            <div class="step-title">Release Resources Email</div>
+            <div class="step-prompt">"The good news? As if it were magic, once we 'release' the emotional splinter this experience created, all those reasons the prefrontal cortex identified will also disappear. You'll simply believe you're capable of these things without any doubts. This 'release' is the first part of healing this wound. If you're interested to learn the best tools to release this emotional splinter, enter your email. I'll share techniques that you can do yourself and other ways that I recommend doing with practitioners. If not, all good — simply reply 'not right now' and I'll proceed to sharing the second part of healing this wound."</div>
+            <div class="step-data"><strong>Data Field:</strong> release_resources_email</div>
+            <div class="new-feature">New email collection for release resources</div>
+        </div>
+
+        <div class="step">
+            <div class="step-number">9</div>
+            <div class="step-title">Protective Archetype</div>
+            <div class="step-prompt">"The second part of healing this wound is to 'rewire'. Like I mentioned, your system hated feeling <span class="variable">{{post_event_feeling}}</span> and never wanted to experience <span class="variable">{{splinter_identity_verdict}}</span> again. In addition to creating an 'inner alarm', it developed protective armour. This armour is a protective pattern — a way to behave to ensure it doesn't happen again. Here are some roles people often adopt. Which one feels most like yours?"</div>
+            <div class="step-options">
+                <strong>Options:</strong><br>
+                • Perfectionist — "It's safer for me to endlessly improve than finish and possibly fail"<br>
+                • People Pleaser — "It's safer for me to stay agreeable, helpful, and low-maintenance than possibly upset others"<br>
+                • Controller — "It's safer for me to manage everything to ensure the outcome is positive"<br>
+                • Performer — "It's safer for me to do what's needed to be liked than leave it to chance"<br>
+                • Ghost — "It's safer for me to hide or withdraw than show up and possibly be hurt"
+            </div>
+            <div class="step-data"><strong>Data Field:</strong> protective_archetype</div>
+        </div>
+
+        <div class="step">
+            <div class="step-number">10</div>
+            <div class="step-title">Archetype Mirror Loop</div>
+            <div class="step-prompt">"Can you see how this Protective Archetype, in its attempt to ensure you never experience <span class="variable">{{splinter_identity_verdict}}</span> again, has caused you to act in a way that stopped you from achieving your ambitions? Ironically, often being this protective archetype causes us to experience the exact thing we were protecting ourselves from."</div>
+            <div class="step-options"><strong>Options:</strong> "Yes, I can see the connection"</div>
+            <div class="step-data"><strong>Data Field:</strong> loop_acknowledged</div>
+        </div>
+
+        <div class="step">
+            <div class="step-number">11</div>
+            <div class="step-title">Essence Archetype</div>
+            <div class="step-prompt">"The process of 'rewiring' is changing our default responses away from this protective archetype and towards what I like to call our Essence Archetype. This is who we were before the protection — who you were naturally. Which of these feels most like the real you?"</div>
+            <div class="step-options">
+                <strong>Options:</strong><br>
+                • 🔥 Radiant Rebel – You are the spark who shakes things up<br>
+                • 🌈 Playful Creator – The creator who brings joy to life<br>
+                • 🃏 Sacred Fool – You are the one who reveals truth with humor<br>
+                • 💗 Wild Alchemist – You are the alchemist who gives pain purpose<br>
+                • ❤️‍🩹 Heart Holder – You are the quiet gravity<br>
+                • 🧵 Cosmic Connector – You are the thread between worlds<br>
+                • 🦁 Compassionate Leader – You are the compass in chaos<br>
+                • 🧭 Truth-Teller – You are the sentence that slices through the noise
+            </div>
+            <div class="step-data"><strong>Data Field:</strong> essence_archetype_selection</div>
+            <div class="new-feature">8 essence archetypes with emojis</div>
+        </div>
+
+        <div class="step">
+            <div class="step-number">12</div>
+            <div class="step-title">Persona Checkpoint</div>
+            <div class="step-prompt">"Where are you now on your return to that essence? 1) Vibe Seeker: Disconnected but ready to reconnect 2) Vibe Riser: Connected but wanting to live more in alignment with it 3) Movement Maker: Already leading from it and wanting to scale my impact"</div>
+            <div class="step-options">
+                <strong>Options:</strong><br>
+                • Vibe Seeker<br>
+                • Vibe Riser<br>
+                • Movement Maker
+            </div>
+            <div class="step-data"><strong>Data Field:</strong> persona_selection</div>
+        </div>
+
+        <div class="step">
+            <div class="step-number">13</div>
+            <div class="step-title">WhatsApp Resources</div>
+            <div class="step-prompt">"Would you also like me to send you more information about your essence archetype and ways to 'turn off the inner alarm'? If yes share your WhatsApp number and we'll send it through. If not, and you're happy to research it yourself, that's okay too."</div>
+            <div class="step-data"><strong>Data Field:</strong> resource_opt_in</div>
+        </div>
+
+        <div class="step">
+            <div class="step-number">14</div>
+            <div class="step-title">7-Day Challenge</div>
+            <div class="step-prompt">"Would you like support removing this protective armour, turning off this inner alarm and bringing your ambitions to life? If yes, we can do something like a 7-day challenge as an experiment to see if you enjoy it."</div>
+            <div class="step-options">
+                <strong>Options:</strong><br>
+                • Sounds great<br>
+                • Not at the moment
+            </div>
+            <div class="step-data"><strong>Data Field:</strong> challenge_opt_in</div>
+        </div>
+
+        <div class="step">
+            <div class="step-number">15</div>
+            <div class="step-title">Closing Message</div>
+            <div class="step-prompt">"Thank you for walking through this journey 🌿 You've uncovered the splinter that shaped your path, the armour that's been protecting you, and the essence that's always been within you. Remember — awareness itself is powerful medicine. Every time you notice your protective pattern or hear your inner alarm, you now have the choice to pause, breathe, and return to your essence. I'm proud of you for showing up for yourself today. This is just the beginning — and you don't have to walk it alone."</div>
+            <div class="step-data"><strong>Data Field:</strong> closing_acknowledgement</div>
+            <div class="new-feature">Beautiful closing message with warm, supportive tone</div>
+        </div>
+
+        <div class="summary">
+            <h3>🎯 Key Improvements in New Alfred Flow</h3>
+            <ul>
+                <li><strong>Alfred's Voice:</strong> More personal, warm, and guiding throughout</li>
+                <li><strong>Enhanced Variable Interpolation:</strong> Dynamic {{variable_name}} replacement</li>
+                <li><strong>New Data Fields:</strong> biology_acknowledgement, release_resources_email, closing_acknowledgement</li>
+                <li><strong>Better Flow Logic:</strong> More sophisticated required_inputs and response_handling</li>
+                <li><strong>16 Total Steps:</strong> From intro through beautiful closing</li>
+                <li><strong>Improved User Experience:</strong> More engaging and personalized journey</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

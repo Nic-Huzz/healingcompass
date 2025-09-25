@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supabase Connection Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        button { padding: 10px 20px; margin: 10px 0; }
+        pre { background: #f8f9fa; padding: 10px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>Supabase Connection Test</h1>
+    
+    <div class="test-section">
+        <h2>Test 1: Direct Supabase API Call</h2>
+        <button onclick="testDirectSupabase()">Test Direct Connection</button>
+        <div id="direct-result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Test 2: Via Our API Endpoint</h2>
+        <button onclick="testOurAPI()">Test Our API</button>
+        <div id="api-result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Test 3: Check Environment Variables</h2>
+        <button onclick="checkEnvVars()">Check Env Vars</button>
+        <div id="env-result"></div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://qlwfcfypnoptsocdpxuv.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_Qizrwuj2oqRtuK2tJx7uxg_M7Bb9WZH';
+        
+        async function testDirectSupabase() {
+            const resultDiv = document.getElementById('direct-result');
+            resultDiv.innerHTML = '<p>Testing direct Supabase connection...</p>';
+            
+            try {
+                const testData = {
+                    session_id: 'test-session-' + Date.now(),
+                    step: 'test_step',
+                    user_name: 'Test User',
+                    flow_version: '1.0.0',
+                    flow_completed: false
+                };
+                
+                const response = await fetch(`${SUPABASE_URL}/rest/v1/responses`, {
+                    method: 'POST',
+                    headers: {
+                        'apikey': SUPABASE_ANON_KEY,
+                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                        'Content-Type': 'application/json',
+                        'Prefer': 'return=minimal'
+                    },
+                    body: JSON.stringify(testData)
+                });
+                
+                if (response.ok) {
+                    resultDiv.innerHTML = '<div class="success"><h3>✅ Direct Supabase Connection: SUCCESS</h3><p>Data inserted successfully!</p></div>';
+                } else {
+                    const errorText = await response.text();
+                    resultDiv.innerHTML = `<div class="error"><h3>❌ Direct Supabase Connection: FAILED</h3><p>Status: ${response.status}</p><pre>${errorText}</pre></div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error"><h3>❌ Direct Supabase Connection: ERROR</h3><pre>${error.message}</pre></div>`;
+            }
+        }
+        
+        async function testOurAPI() {
+            const resultDiv = document.getElementById('api-result');
+            resultDiv.innerHTML = '<p>Testing our API endpoint...</p>';
+            
+            try {
+                const testData = {
+                    session_id: 'test-session-' + Date.now(),
+                    step: 'test_step',
+                    user_name: 'Test User',
+                    flow_version: '1.0.0',
+                    flow_completed: false
+                };
+                
+                const response = await fetch('/api/supabase', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ data: testData })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    resultDiv.innerHTML = '<div class="success"><h3>✅ Our API Endpoint: SUCCESS</h3><pre>' + JSON.stringify(result, null, 2) + '</pre></div>';
+                } else {
+                    resultDiv.innerHTML = `<div class="error"><h3>❌ Our API Endpoint: FAILED</h3><p>Status: ${response.status}</p><pre>${JSON.stringify(result, null, 2)}</pre></div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error"><h3>❌ Our API Endpoint: ERROR</h3><pre>${error.message}</pre></div>`;
+            }
+        }
+        
+        async function checkEnvVars() {
+            const resultDiv = document.getElementById('env-result');
+            resultDiv.innerHTML = '<p>Checking environment variables...</p>';
+            
+            try {
+                const response = await fetch('/api/supabase', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ 
+                        data: { 
+                            session_id: 'env-test',
+                            step: 'env_check',
+                            user_name: 'Env Test'
+                        },
+                        checkEnv: true 
+                    })
+                });
+                
+                const result = await response.json();
+                resultDiv.innerHTML = `<div class="success"><h3>Environment Variables Check</h3><pre>${JSON.stringify(result, null, 2)}</pre></div>`;
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error"><h3>❌ Environment Check: ERROR</h3><pre>${error.message}</pre></div>`;
+            }
+        }
+    </script>
+</body>
+</html>

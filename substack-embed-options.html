@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Substack Embed Options</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f8f9fa;
+        }
+        .container {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        h1 {
+            color: #5e17eb;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .option {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 4px solid #5e17eb;
+        }
+        .option h3 {
+            color: #5e17eb;
+            margin-top: 0;
+        }
+        .code-block {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 14px;
+            overflow-x: auto;
+            margin: 15px 0;
+        }
+        .copy-btn {
+            background: #5e17eb;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            margin-top: 10px;
+        }
+        .copy-btn:hover {
+            background: #7c3aed;
+        }
+        .preview {
+            border: 2px dashed #5e17eb;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 15px 0;
+            text-align: center;
+            background: #f8f9fa;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧭 Substack Embed Options for Healing Compass</h1>
+        
+        <div class="option">
+            <h3>Option 1: Simple iframe Embed (Recommended)</h3>
+            <p>This creates a clean, embedded version of your flow that will work perfectly in Substack.</p>
+            <div class="code-block">
+&lt;iframe 
+  src="https://healingcompass.nichuzz.com" 
+  width="100%" 
+  height="600" 
+  frameborder="0" 
+  style="border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1);"
+  title="Healing Compass - Discover Your Protective Patterns"
+&gt;&lt;/iframe&gt;
+            </div>
+            <button class="copy-btn" onclick="copyToClipboard('iframe')">Copy iframe Code</button>
+        </div>
+
+        <div class="option">
+            <h3>Option 2: Responsive iframe with Mobile Optimization</h3>
+            <p>This version automatically adjusts to different screen sizes and works great on mobile.</p>
+            <div class="code-block">
+&lt;div style="position: relative; width: 100%; height: 0; padding-bottom: 75%;"&gt;
+  &lt;iframe 
+    src="https://healingcompass.nichuzz.com" 
+    style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1);"
+    title="Healing Compass - Discover Your Protective Patterns"
+  &gt;&lt;/iframe&gt;
+&lt;/div&gt;
+            </div>
+            <button class="copy-btn" onclick="copyToClipboard('responsive')">Copy Responsive Code</button>
+        </div>
+
+        <div class="option">
+            <h3>Option 3: Call-to-Action Button with Link</h3>
+            <p>If iframe embedding doesn't work, use this button that opens the flow in a new tab.</p>
+            <div class="code-block">
+&lt;div style="text-align: center; margin: 30px 0;"&gt;
+  &lt;a href="https://healingcompass.nichuzz.com" target="_blank" style="
+    display: inline-block;
+    background: linear-gradient(135deg, #5e17eb 0%, #7c3aed 100%);
+    color: white;
+    text-decoration: none;
+    padding: 16px 32px;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 18px;
+    box-shadow: 0 4px 20px rgba(94, 23, 235, 0.3);
+    transition: all 0.3s ease;
+  " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 25px rgba(94, 23, 235, 0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 20px rgba(94, 23, 235, 0.3)'"&gt;
+    🧭 Discover Your Protective Patterns
+  &lt;/a&gt;
+&lt;/div&gt;
+            </div>
+            <button class="copy-btn" onclick="copyToClipboard('button')">Copy Button Code</button>
+        </div>
+
+        <div class="option">
+            <h3>Option 4: Full-Width Card Embed</h3>
+            <p>A beautiful card-style embed that looks great in Substack posts.</p>
+            <div class="code-block">
+&lt;div style="
+  background: linear-gradient(135deg, #5e17eb 0%, #7c3aed 100%);
+  border-radius: 16px;
+  padding: 30px;
+  text-align: center;
+  margin: 30px 0;
+  box-shadow: 0 8px 32px rgba(94, 23, 235, 0.2);
+"&gt;
+  &lt;h3 style="color: white; margin: 0 0 15px 0; font-size: 24px;"&gt;🧭 Healing Compass&lt;/h3&gt;
+  &lt;p style="color: rgba(255,255,255,0.9); margin: 0 0 20px 0; font-size: 16px;"&gt;
+    Uncover the patterns that quietly block your ambitions and discover your true essence
+  &lt;/p&gt;
+  &lt;a href="https://healingcompass.nichuzz.com" target="_blank" style="
+    display: inline-block;
+    background: white;
+    color: #5e17eb;
+    text-decoration: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+  " onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'"&gt;
+    Start Your Journey
+  &lt;/a&gt;
+&lt;/div&gt;
+            </div>
+            <button class="copy-btn" onclick="copyToClipboard('card')">Copy Card Code</button>
+        </div>
+
+        <div class="option">
+            <h3>Option 5: Minimal Text Link</h3>
+            <p>Simple and clean - just a text link for minimal integration.</p>
+            <div class="code-block">
+&lt;p&gt;
+  Ready to uncover the patterns that quietly block your ambitions? 
+  &lt;a href="https://healingcompass.nichuzz.com" target="_blank" style="color: #5e17eb; text-decoration: none; font-weight: 600;"&gt;
+    Take the Healing Compass journey here
+  &lt;/a&gt; 
+  and discover your protective patterns.
+&lt;/p&gt;
+            </div>
+            <button class="copy-btn" onclick="copyToClipboard('text')">Copy Text Link</button>
+        </div>
+    </div>
+
+    <script>
+        function copyToClipboard(type) {
+            let code = '';
+            
+            switch(type) {
+                case 'iframe':
+                    code = `<iframe 
+  src="https://healingcompass.nichuzz.com" 
+  width="100%" 
+  height="600" 
+  frameborder="0" 
+  style="border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1);"
+  title="Healing Compass - Discover Your Protective Patterns"
+></iframe>`;
+                    break;
+                case 'responsive':
+                    code = `<div style="position: relative; width: 100%; height: 0; padding-bottom: 75%;">
+  <iframe 
+    src="https://healingcompass.nichuzz.com" 
+    style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1);"
+    title="Healing Compass - Discover Your Protective Patterns"
+  ></iframe>
+</div>`;
+                    break;
+                case 'button':
+                    code = `<div style="text-align: center; margin: 30px 0;">
+  <a href="https://healingcompass.nichuzz.com" target="_blank" style="
+    display: inline-block;
+    background: linear-gradient(135deg, #5e17eb 0%, #7c3aed 100%);
+    color: white;
+    text-decoration: none;
+    padding: 16px 32px;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 18px;
+    box-shadow: 0 4px 20px rgba(94, 23, 235, 0.3);
+    transition: all 0.3s ease;
+  " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 25px rgba(94, 23, 235, 0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 20px rgba(94, 23, 235, 0.3)'">
+    🧭 Discover Your Protective Patterns
+  </a>
+</div>`;
+                    break;
+                case 'card':
+                    code = `<div style="
+  background: linear-gradient(135deg, #5e17eb 0%, #7c3aed 100%);
+  border-radius: 16px;
+  padding: 30px;
+  text-align: center;
+  margin: 30px 0;
+  box-shadow: 0 8px 32px rgba(94, 23, 235, 0.2);
+">
+  <h3 style="color: white; margin: 0 0 15px 0; font-size: 24px;">🧭 Healing Compass</h3>
+  <p style="color: rgba(255,255,255,0.9); margin: 0 0 20px 0; font-size: 16px;">
+    Uncover the patterns that quietly block your ambitions and discover your true essence
+  </p>
+  <a href="https://healingcompass.nichuzz.com" target="_blank" style="
+    display: inline-block;
+    background: white;
+    color: #5e17eb;
+    text-decoration: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+  " onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+    Start Your Journey
+  </a>
+</div>`;
+                    break;
+                case 'text':
+                    code = `<p>
+  Ready to uncover the patterns that quietly block your ambitions? 
+  <a href="https://healingcompass.nichuzz.com" target="_blank" style="color: #5e17eb; text-decoration: none; font-weight: 600;">
+    Take the Healing Compass journey here
+  </a> 
+  and discover your protective patterns.
+</p>`;
+                    break;
+            }
+            
+            navigator.clipboard.writeText(code).then(() => {
+                alert('Code copied to clipboard!');
+            });
+        }
+    </script>
+</body>
+</html>
