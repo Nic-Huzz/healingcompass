@@ -108,7 +108,7 @@ export default async function handler(req, res) {
       body: JSON.stringify({
         from: 'Huzz@nichuzz.com',
         to: [email],
-        subject: archetypeResources.title,
+        subject: emailContent.title,
         html: emailHtml,
       }),
     });

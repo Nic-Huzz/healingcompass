@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email System Demo - Healing Compass</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: linear-gradient(135deg, #5e17eb, #ffdd27);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .header h1 {
+            color: #5e17eb;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            color: #666;
+            font-size: 1.1em;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: #5e17eb;
+        }
+        
+        .button {
+            background: linear-gradient(135deg, #5e17eb, #ffdd27);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: transform 0.2s ease;
+        }
+        
+        .button:hover {
+            transform: translateY(-2px);
+        }
+        
+        .button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .result {
+            margin-top: 30px;
+            padding: 20px;
+            border-radius: 10px;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+        
+        .success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        
+        .error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        
+        .loading {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+        }
+        
+        .demo-info {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            border-left: 4px solid #5e17eb;
+        }
+        
+        .demo-info h3 {
+            color: #5e17eb;
+            margin-bottom: 10px;
+        }
+        
+        .demo-info p {
+            color: #666;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🌿 Email System Demo</h1>
+            <p>Test the Healing Compass email automation</p>
+        </div>
+        
+        <div class="demo-info">
+            <h3>📧 How it works:</h3>
+            <p>This simulates step 7 of the Healing Compass flow where users enter their email to receive archetype resources. The email is triggered immediately after they submit their email address.</p>
+        </div>
+        
+        <form id="emailForm">
+            <div class="form-group">
+                <label for="email">Email Address *</label>
+                <input type="email" id="email" placeholder="your@email.com" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="user_name">Your Name *</label>
+                <input type="text" id="user_name" placeholder="Enter your name" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="essence_archetype">Essence Archetype *</label>
+                <select id="essence_archetype" required>
+                    <option value="">Select your essence archetype</option>
+                    <option value="Radiant Rebel">Radiant Rebel</option>
+                    <option value="Playful Creator">Playful Creator</option>
+                    <option value="Sacred Jester">Sacred Jester</option>
+                    <option value="Heart Alchemist">Heart Alchemist</option>
+                    <option value="Heart Holder">Heart Holder</option>
+                    <option value="Cosmic Connector">Cosmic Connector</option>
+                    <option value="Compassionate Leader">Compassionate Leader</option>
+                    <option value="Truth-Teller">Truth-Teller</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="protective_archetype">Protective Archetype *</label>
+                <select id="protective_archetype" required>
+                    <option value="">Select your protective archetype</option>
+                    <option value="Perfectionist">Perfectionist</option>
+                    <option value="People Pleaser">People Pleaser</option>
+                    <option value="Controller">Controller</option>
+                    <option value="Performer">Performer</option>
+                    <option value="Ghost">Ghost</option>
+                </select>
+            </div>
+            
+            <button type="submit" class="button" id="submitBtn">
+                🚀 Send Test Email
+            </button>
+        </form>
+        
+        <div id="result" class="result" style="display: none;"></div>
+    </div>
+
+    <script>
+        document.getElementById('emailForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const submitBtn = document.getElementById('submitBtn');
+            const resultDiv = document.getElementById('result');
+            
+            // Get form data
+            const email = document.getElementById('email').value;
+            const user_name = document.getElementById('user_name').value;
+            const essence_archetype = document.getElementById('essence_archetype').value;
+            const protective_archetype = document.getElementById('protective_archetype').value;
+            
+            // Show loading state
+            submitBtn.disabled = true;
+            submitBtn.textContent = '⏳ Sending...';
+            resultDiv.style.display = 'block';
+            resultDiv.className = 'result loading';
+            resultDiv.textContent = 'Sending email... Please wait.';
+            
+            try {
+                const response = await fetch('/api/send-email', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ 
+                        email, 
+                        user_name, 
+                        archetype: essence_archetype,
+                        protective_archetype 
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    resultDiv.className = 'result success';
+                    resultDiv.textContent = `✅ Email sent successfully!\n\nEmail ID: ${result.emailId}\nRecipient: ${email}\nSubject: ${result.subject || 'Your Emotional Splinters Guide'}\n\nCheck your inbox (and spam folder) for the email.`;
+                } else {
+                    resultDiv.className = 'result error';
+                    resultDiv.textContent = `❌ Email failed to send:\n\nStatus: ${response.status}\nError: ${result.error}\nDetails: ${result.details || 'No additional details'}`;
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = `❌ Network error:\n\n${error.message}\n\nThis might mean:\n- The API endpoint is not deployed\n- The Resend API key is not configured\n- There's a network connectivity issue`;
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = '🚀 Send Test Email';
+            }
+        });
+        
+        // Add some demo data for quick testing
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('email').value = 'test@example.com';
+            document.getElementById('user_name').value = 'Test User';
+            document.getElementById('essence_archetype').value = 'Radiant Rebel';
+            document.getElementById('protective_archetype').value = 'Perfectionist';
+        });
+    </script>
+</body>
+</html>

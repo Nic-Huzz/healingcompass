@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Email Test</title>
+</head>
+<body>
+    <h1>Email System Test</h1>
+    <form id="emailForm">
+        <input type="email" id="email" placeholder="Enter email" required>
+        <input type="text" id="user_name" placeholder="Your name" required>
+        <input type="text" id="archetype" placeholder="Essence archetype" required>
+        <input type="text" id="protective_archetype" placeholder="Protective archetype" required>
+        <button type="submit">Send Test Email</button>
+    </form>
+    
+    <div id="result"></div>
+
+    <script>
+        document.getElementById('emailForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const user_name = document.getElementById('user_name').value;
+            const archetype = document.getElementById('archetype').value;
+            const protective_archetype = document.getElementById('protective_archetype').value;
+            
+            try {
+                const response = await fetch('/api/send-email', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email, user_name, archetype, protective_archetype })
+                });
+                
+                const result = await response.json();
+                document.getElementById('result').innerHTML = `
+                    <h3>Response:</h3>
+                    <pre>${JSON.stringify(result, null, 2)}</pre>
+                `;
+            } catch (error) {
+                document.getElementById('result').innerHTML = `
+                    <h3>Error:</h3>
+                    <pre>${error.message}</pre>
+                `;
+            }
+        });
+    </script>
+</body>
+</html>
