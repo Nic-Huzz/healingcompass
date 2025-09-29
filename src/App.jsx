@@ -1,5 +1,14 @@
+/* 
+HEALING COMPASS — DO NOT CHANGE FLOW COPY/LOGIC HERE.
+Allowed edits:
+- Import/use flow persistence helpers
+- Hydrate from getLastSession()
+- Call upsertSession/logEvent in submit paths
+*/
 import { useState, useRef, useEffect } from 'react'
 import './App.css'
+import { upsertSession, logEvent, getLastSession } from './lib/flowPersistence'
+import { useEnsureProfile } from './hooks/useEnsureProfile'
 
 function App() {
   const [flow, setFlow] = useState(null)
@@ -12,6 +21,9 @@ function App() {
   const [typingMessage, setTypingMessage] = useState('')
   const [sessionId] = useState(() => `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`)
   const messagesEndRef = useRef(null)
+
+  // Profile management
+  const { profile, updateProfileFromContext } = useEnsureProfile()
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -50,7 +62,26 @@ function App() {
         setFlow({ ...data, nodes })
         setFlowMeta({ name: data?.flow_name || 'Flow', version: data?.version || '0.0.0', ok: true, error: null })
         
-        // Try to restore from localStorage
+        // Try to restore from server first
+        const serverSession = await getLastSession()
+        if (serverSession) {
+          try {
+            const { current_index, context: serverContext } = serverSession
+            if (serverContext && typeof current_index === 'number') {
+              setContext(serverContext)
+              setCurrentIndex(current_index)
+              // Rebuild messages from server context
+              const first = nodes[0]
+              const firstPrompt = interpolateText(first.prompt, serverContext)
+              setMessages([{ id: 'sys-0', isAI: true, text: firstPrompt, timestamp: new Date().toLocaleTimeString() }])
+              return
+            }
+          } catch (e) {
+            console.warn('Failed to restore from server:', e)
+          }
+        }
+        
+        // Fallback to localStorage
         const saved = localStorage.getItem('flow-conversation')
         if (saved) {
           try {
@@ -217,6 +248,22 @@ function App() {
     setMessages(newMessages)
     setInputText('')
 
+    // Persist to server (non-blocking)
+    try {
+      const session = await upsertSession({ current_index: nextIndex, context: updates })
+      if (session) {
+        await logEvent({ 
+          session_id: session.id, 
+          step_key: currentNode.step, 
+          payload: updates 
+        })
+      }
+      // Update profile from context
+      updateProfileFromContext(updates)
+    } catch (error) {
+      console.warn('[App] Persistence failed', { error: error.message })
+    }
+
     // Submit progress to Supabase
     await submitProgressToSupabase(updates)
 
@@ -340,6 +387,22 @@ function App() {
     // Add user message immediately
     const newMessages = [...messages, userMessage]
     setMessages(newMessages)
+
+    // Persist to server (non-blocking)
+    try {
+      const session = await upsertSession({ current_index: nextIndex, context: updates })
+      if (session) {
+        await logEvent({ 
+          session_id: session.id, 
+          step_key: currentNode.step, 
+          payload: updates 
+        })
+      }
+      // Update profile from context
+      updateProfileFromContext(updates)
+    } catch (error) {
+      console.warn('[App] Persistence failed', { error: error.message })
+    }
 
     // Submit progress to Supabase
     await submitProgressToSupabase(updates)
