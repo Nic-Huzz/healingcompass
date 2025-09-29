@@ -479,6 +479,21 @@ function App() {
               )}
             </p>
           </div>
+          <a 
+            href="/me" 
+            style={{
+              background: 'none',
+              border: '1px solid #5e17eb',
+              color: '#5e17eb',
+              padding: '8px 16px',
+              borderRadius: '6px',
+              textDecoration: 'none',
+              fontSize: '14px',
+              fontWeight: '500'
+            }}
+          >
+            My Profile
+          </a>
         </div>
       </header>
 
