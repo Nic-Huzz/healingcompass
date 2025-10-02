@@ -9,7 +9,7 @@ import { useState, useRef, useEffect } from 'react'
 import './App.css'
 import { upsertSession, logEvent, getLastSession } from './lib/flowPersistence'
 import { useEnsureProfile } from './hooks/useEnsureProfile'
-import { resolvePrompt, interpolateVars } from './lib/promptResolver' // [macros]
+import { resolvePrompt } from './lib/promptResolver' // [macros]
 
 function App({ flowSrc = '/flow.json' } = {}) { // [flowSrc]
   const [flow, setFlow] = useState(null)
@@ -417,7 +417,7 @@ function App({ flowSrc = '/flow.json' } = {}) { // [flowSrc]
       if (archetypeData) {
         // Use the archetype reveal template with archetype-specific data
         const revealTemplate = "You are the **{{essence_archetype_selection}}**.\n\n{{poetic_line}}\n\nYou carry a frequency that others feel — even when they can't name it.\n{{energetic_transmission}}\n\nAt your core, your essence is:\n{{essence}}\n\nYour natural superpower — the way you shift spaces and people is —\n{{superpower}}\n\nLet your path be guided by this deeper truth:\n{{north_star}}\n\nI see a vision for your future. To fulfil it, ask yourself:\n{{poetic_vision}}\n\nWhen you live this truth out loud — not just in theory but in embodiment —\n{{vision_in_action}}\n\n**Does this feel like you?**"
-        responseText = interpolateVars(revealTemplate, { ...updates, ...archetypeData })
+        responseText = resolvePrompt({ prompt: revealTemplate }, { ...updates, ...archetypeData }) // [macros]
       } else {
         responseText = nextNode ? resolvePrompt(nextNode, updates) : 'Flow completed' // [macros]
       }
