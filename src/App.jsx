@@ -9,7 +9,7 @@ import { useState, useRef, useEffect } from 'react'
 import './App.css'
 import { upsertSession, logEvent, getLastSession } from './lib/flowPersistence'
 import { useEnsureProfile } from './hooks/useEnsureProfile'
-import { resolvePrompt } from './lib/promptResolver' // [macros]
+import { resolvePrompt } from '@/lib/promptResolver' // [macros]
 
 function App({ flowSrc = '/flow.json' } = {}) { // [flowSrc]
   const [flow, setFlow] = useState(null)
