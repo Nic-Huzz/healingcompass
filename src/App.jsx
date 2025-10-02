@@ -10,7 +10,7 @@ import './App.css'
 import { upsertSession, logEvent, getLastSession } from './lib/flowPersistence'
 import { useEnsureProfile } from './hooks/useEnsureProfile'
 
-function App() {
+function App({ flowSrc = '/flow.json' } = {}) { // [flowSrc]
   const [flow, setFlow] = useState(null)
   const [flowMeta, setFlowMeta] = useState({ name: 'No flow loaded', version: null, ok: false, error: null })
   const [messages, setMessages] = useState([])
@@ -54,7 +54,8 @@ function App() {
   useEffect(() => {
     const load = async () => {
       try {
-        const res = await fetch('/flow.json', { cache: 'no-store' })
+        const source = flowSrc || '/flow.json' // [flowSrc]
+        const res = await fetch(source, { cache: 'no-store' }) // [flowSrc]
         if (!res.ok) throw new Error(`HTTP ${res.status}`)
         const data = await res.json()
         const nodes = Array.isArray(data?.steps) ? [...data.steps].sort((a,b) => (a.step_order_index||0) - (b.step_order_index||0)) : []
@@ -112,7 +113,7 @@ function App() {
       }
     }
     load()
-  }, [])
+  }, [flowSrc]) // [flowSrc]
 
   // Save to localStorage whenever state changes
   useEffect(() => {
