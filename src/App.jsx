@@ -9,6 +9,7 @@ import { useState, useRef, useEffect } from 'react'
 import './App.css'
 import { upsertSession, logEvent, getLastSession } from './lib/flowPersistence'
 import { useEnsureProfile } from './hooks/useEnsureProfile'
+import { resolvePrompt, interpolateVars } from './lib/promptResolver' // [macros]
 
 function App({ flowSrc = '/flow.json' } = {}) { // [flowSrc]
   const [flow, setFlow] = useState(null)
@@ -30,12 +31,6 @@ function App({ flowSrc = '/flow.json' } = {}) { // [flowSrc]
   }, [messages, typingMessage])
 
   // Variable interpolation function
-  const interpolateText = (text, context) => {
-    return text.replace(/\{\{(\w+)\}\}/g, (match, variable) => {
-      return context[variable] || match
-    })
-  }
-
   // Typewriter effect
   const typeText = async (text, callback) => {
     setTypingMessage('')
@@ -73,7 +68,7 @@ function App({ flowSrc = '/flow.json' } = {}) { // [flowSrc]
               setCurrentIndex(current_index)
               // Rebuild messages from server context
               const first = nodes[0]
-              const firstPrompt = interpolateText(first.prompt, serverContext)
+              const firstPrompt = resolvePrompt(first, serverContext) // [macros]
               setMessages([{ id: 'sys-0', isAI: true, text: firstPrompt, timestamp: new Date().toLocaleTimeString() }])
               return
             }
@@ -102,9 +97,9 @@ function App({ flowSrc = '/flow.json' } = {}) { // [flowSrc]
         const first = nodes[0]
         setMessages([{ id: 'sys-0', isAI: true, text: '', timestamp: new Date().toLocaleTimeString() }])
         setCurrentIndex(0)
-        
+
         // Type the first message
-        const firstPrompt = interpolateText(first.prompt, {})
+        const firstPrompt = resolvePrompt(first, {}) // [macros]
         await typeText(firstPrompt, () => {
           setMessages([{ id: 'sys-0', isAI: true, text: firstPrompt, timestamp: new Date().toLocaleTimeString() }])
         })
@@ -284,9 +279,9 @@ function App({ flowSrc = '/flow.json' } = {}) { // [flowSrc]
 
     // Check if this is the last step
     const isLastStep = !nextNode
-    const responseText = currentNode.response_handling && currentNode.response_handling[trimmed] 
-      ? currentNode.response_handling[trimmed] 
-      : (nextNode ? interpolateText(nextNode.prompt, updates) : "Flow completed")
+    const responseText = currentNode.response_handling && currentNode.response_handling[trimmed]
+      ? currentNode.response_handling[trimmed]
+      : (nextNode ? resolvePrompt(nextNode, updates) : 'Flow completed') // [macros]
 
     // Add AI message with typewriter effect
     const aiMessage = { 
@@ -422,16 +417,16 @@ function App({ flowSrc = '/flow.json' } = {}) { // [flowSrc]
       if (archetypeData) {
         // Use the archetype reveal template with archetype-specific data
         const revealTemplate = "You are the **{{essence_archetype_selection}}**.\n\n{{poetic_line}}\n\nYou carry a frequency that others feel — even when they can't name it.\n{{energetic_transmission}}\n\nAt your core, your essence is:\n{{essence}}\n\nYour natural superpower — the way you shift spaces and people is —\n{{superpower}}\n\nLet your path be guided by this deeper truth:\n{{north_star}}\n\nI see a vision for your future. To fulfil it, ask yourself:\n{{poetic_vision}}\n\nWhen you live this truth out loud — not just in theory but in embodiment —\n{{vision_in_action}}\n\n**Does this feel like you?**"
-        responseText = interpolateText(revealTemplate, { ...updates, ...archetypeData })
+        responseText = interpolateVars(revealTemplate, { ...updates, ...archetypeData })
       } else {
-        responseText = nextNode ? interpolateText(nextNode.prompt, updates) : "Flow completed"
+        responseText = nextNode ? resolvePrompt(nextNode, updates) : 'Flow completed' // [macros]
       }
     } else {
       // Standard response handling
       const hasResponseHandling = currentNode.response_handling && currentNode.response_handling[value]
-      responseText = hasResponseHandling 
-        ? currentNode.response_handling[value] 
-        : (nextNode ? interpolateText(nextNode.prompt, updates) : "Flow completed")
+      responseText = hasResponseHandling
+        ? currentNode.response_handling[value]
+        : (nextNode ? resolvePrompt(nextNode, updates) : 'Flow completed') // [macros]
     }
 
     // Add AI message with typewriter effect
