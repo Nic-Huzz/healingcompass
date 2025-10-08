@@ -5,6 +5,7 @@ import { getLastSession } from '../lib/flowPersistence'
 export default function Profile({ onNavigate }) {
   const [profile, setProfile] = useState(null)
   const [session, setSession] = useState(null)
+  const [leadProfile, setLeadProfile] = useState(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -17,7 +18,7 @@ export default function Profile({ onNavigate }) {
           return
         }
 
-        // Get profile
+        // Get core profile
         const { data: profileData, error: profileError } = await supabase
           .from('profiles')
           .select('*')
@@ -28,6 +29,35 @@ export default function Profile({ onNavigate }) {
           console.warn('[Profile] Failed to load profile', { error: profileError.message })
         } else {
           setProfile(profileData)
+        }
+
+        // Get latest lead magnet snapshot
+        const { data: leadData, error: leadError } = await supabase
+          .from('lead_flow_profiles')
+          .select('*')
+          .eq('user_id', session.user.id)
+          .order('updated_at', { ascending: false })
+          .limit(1)
+          .maybeSingle()
+
+        if (leadError && leadError.code !== 'PGRST116') {
+          console.warn('[Profile] Failed to load lead profile', { error: leadError.message })
+        } else if (leadData) {
+          setLeadProfile(leadData)
+        } else if (!leadData && profileData?.email) {
+          const { data: leadByEmail, error: leadByEmailError } = await supabase
+            .from('lead_flow_profiles')
+            .select('*')
+            .eq('email', profileData.email)
+            .order('updated_at', { ascending: false })
+            .limit(1)
+            .maybeSingle()
+
+          if (leadByEmailError && leadByEmailError.code !== 'PGRST116') {
+            console.warn('[Profile] Failed to load lead profile by email', { error: leadByEmailError.message })
+          } else if (leadByEmail) {
+            setLeadProfile(leadByEmail)
+          }
         }
 
         // Check for active session
@@ -44,12 +74,20 @@ export default function Profile({ onNavigate }) {
     loadProfile()
   }, [])
 
-  const handleContinueFlow = () => {
+  const handleContinueFlow = (target) => {
     if (onNavigate) {
-      onNavigate('/')
+      onNavigate(target)
     } else {
-      window.location.href = '/'
+      window.location.href = target
     }
+  }
+
+  const combinedProfile = {
+    display_name: leadProfile?.user_name || profile?.display_name || '',
+    email: leadProfile?.email || profile?.email || '',
+    essence_archetype: leadProfile?.essence_archetype || profile?.essence_archetype || '',
+    protective_archetype: leadProfile?.protective_archetype || profile?.protective_archetype || '',
+    persona: leadProfile?.persona || profile?.persona || ''
   }
 
   if (loading) {
@@ -102,24 +140,27 @@ export default function Profile({ onNavigate }) {
             <div className="bubble">
               <div className="text">
                 <h2>Your Profile</h2>
-                {profile ? (
+                {combinedProfile.display_name || combinedProfile.email || combinedProfile.essence_archetype || combinedProfile.protective_archetype || combinedProfile.persona ? (
                   <div style={{ marginTop: '20px', lineHeight: '1.6' }}>
-                    <p><strong>Name:</strong> {profile.display_name || 'Not set'}</p>
-                    <p><strong>Email:</strong> {profile.email || 'Not set'}</p>
-                    <p><strong>Essence Archetype:</strong> {profile.essence_archetype || 'Not discovered yet'}</p>
-                    <p><strong>Protective Archetype:</strong> {profile.protective_archetype || 'Not discovered yet'}</p>
-                    <p><strong>Persona:</strong> {profile.persona || 'Not set'}</p>
+                    <p><strong>Name:</strong> {combinedProfile.display_name || 'Not set'}</p>
+                    <p><strong>Email:</strong> {combinedProfile.email || 'Not set'}</p>
+                    <p><strong>Essence Archetype:</strong> {combinedProfile.essence_archetype || 'Not discovered yet'}</p>
+                    <p><strong>Protective Archetype:</strong> {combinedProfile.protective_archetype || 'Not discovered yet'}</p>
+                    <p><strong>Persona:</strong> {combinedProfile.persona || 'Not set'}</p>
                   </div>
                 ) : (
                   <p>No profile data available. Complete the Healing Compass flow to see your results.</p>
                 )}
-                
-                {session && (
+                { (session || leadProfile) && (
                   <div style={{ marginTop: '30px', padding: '20px', background: '#f8f9fa', borderRadius: '8px' }}>
                     <h3>Continue Your Journey</h3>
-                    <p>You have an active Healing Compass session. Pick up where you left off!</p>
+                    <p>
+                      {session
+                        ? 'You have an active Healing Compass session. Pick up where you left off!'
+                        : 'Jump back into the lead flow and keep building your profile insights.'}
+                    </p>
                     <button 
-                      onClick={handleContinueFlow}
+                      onClick={() => handleContinueFlow(session ? '/healingcompass' : '/lead')}
                       style={{
                         background: 'linear-gradient(135deg, #5e17eb, #ffdd27)',
                         color: 'white',
@@ -132,7 +173,7 @@ export default function Profile({ onNavigate }) {
                         marginTop: '10px'
                       }}
                     >
-                      Continue Healing Compass
+                      {session ? 'Continue Healing Compass' : 'Resume Lead Flow'}
                     </button>
                   </div>
                 )}

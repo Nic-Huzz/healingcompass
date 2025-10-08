@@ -4,7 +4,7 @@
     "name": "Lead Magnet Flow",
     "description": "A short introduction flow to help users identify their Protective and Essence Archetypes and unlock their profile."
   },
-  "nodes": [
+  "steps": [
     {
       "step": "lead_q1_intro_name",
       "step_order_index": 1.0,

@@ -204,7 +204,8 @@ function App({ flowSrc = '/flow.json' } = {}) { // [flowSrc]
         const res = await fetch(source, { cache: 'no-store' }) // [flowSrc]
         if (!res.ok) throw new Error(`HTTP ${res.status}`)
         const data = await res.json()
-        const nodes = Array.isArray(data?.steps) ? [...data.steps].sort((a,b) => (a.step_order_index||0) - (b.step_order_index||0)) : []
+        const nodes = Array.isArray(data?.steps) ? [...data.steps].sort((a,b) => (a.step_order_index||0) - (b.step_order_index||0)) : 
+                     Array.isArray(data?.nodes) ? [...data.nodes].sort((a,b) => (a.step_order_index||0) - (b.step_order_index||0)) : []
         if (!nodes.length) throw new Error('No steps found')
         setFlow({ ...data, nodes })
         setFlowMeta({ name: data?.flow_name || 'Flow', version: data?.version || '0.0.0', ok: true, error: null })
@@ -335,34 +336,55 @@ function App({ flowSrc = '/flow.json' } = {}) { // [flowSrc]
   // Submit data after each question
   const submitProgressToSupabase = async (updates) => {
     try {
+      // Determine if this is a lead magnet flow or healing compass flow
+      const isLeadMagnetFlow = flowMeta.name?.toLowerCase().includes('lead') || 
+                              flowSrc?.includes('lead_magnet') ||
+                              currentNode?.step?.startsWith('lead_')
+      
       const progressData = {
         session_id: sessionId,
         step: currentNode?.step || 'unknown',
         step_index: currentIndex,
         user_name: updates.user_name || context.user_name || '',
-        healing_compass_consent: updates.healing_compass_consent || context.healing_compass_consent || '',
-        ambition_gap: updates.ambition_gap || context.ambition_gap || '',
-        // Use correct field names from flow.json
-        logical_reasons_list: updates.logical_reasons_list || context.logical_reasons_list || '',
-        past_parallel_context: updates.past_parallel_context || context.past_parallel_context || '',
-        splinter_event_description: updates.splinter_event_description || context.splinter_event_description || '',
-        post_event_feeling: updates.post_event_feeling || context.post_event_feeling || '',
-        splinter_identity_verdict: updates.splinter_identity_verdict || context.splinter_identity_verdict || '',
-        biology_acknowledgement: updates.biology_acknowledgement || context.biology_acknowledgement || '',
-        inner_alarm_resources_email: updates.inner_alarm_resources_email || context.inner_alarm_resources_email || '',
-        release_resources_email: updates.release_resources_email || context.release_resources_email || '',
-        protective_archetype: updates.protective_archetype || context.protective_archetype || '',
-        archetype_acknowledgment: updates.archetype_acknowledgment || context.archetype_acknowledgment || '',
-        loop_acknowledged: updates.loop_acknowledged || context.loop_acknowledged || '',
-        essence_archetype_selection: updates.essence_archetype_selection || context.essence_archetype_selection || '',
-        essence_reveal_response: updates.essence_reveal_response || context.essence_reveal_response || '',
-        persona_selection: updates.persona_selection || context.persona_selection || '',
-        resource_opt_in: updates.resource_opt_in || context.resource_opt_in || '',
-        challenge_opt_in: updates.challenge_opt_in || context.challenge_opt_in || '',
-        closing_acknowledgement: updates.closing_acknowledgement || context.closing_acknowledgement || '',
-        email: updates.email || context.email || '',
         flow_version: flowMeta.version || '1.0.0',
         flow_completed: false
+      }
+
+      if (isLeadMagnetFlow) {
+        // Lead magnet flow specific fields
+        progressData.protective_archetype = updates.protective_archetype_selection || 
+                                          updates.protective_archetype || 
+                                          context.protective_archetype_selection || 
+                                          context.protective_archetype || ''
+        progressData.essence_archetype_selection = updates.essence_archetype_selection || 
+                                                 context.essence_archetype_selection || ''
+        progressData.email = updates.user_email || 
+                           updates.email || 
+                           context.user_email || 
+                           context.email || ''
+        progressData.persona_selection = updates.persona_selection || context.persona_selection || ''
+      } else {
+        // Healing compass flow fields
+        progressData.healing_compass_consent = updates.healing_compass_consent || context.healing_compass_consent || ''
+        progressData.ambition_gap = updates.ambition_gap || context.ambition_gap || ''
+        progressData.logical_reasons_list = updates.logical_reasons_list || context.logical_reasons_list || ''
+        progressData.past_parallel_context = updates.past_parallel_context || context.past_parallel_context || ''
+        progressData.splinter_event_description = updates.splinter_event_description || context.splinter_event_description || ''
+        progressData.post_event_feeling = updates.post_event_feeling || context.post_event_feeling || ''
+        progressData.splinter_identity_verdict = updates.splinter_identity_verdict || context.splinter_identity_verdict || ''
+        progressData.biology_acknowledgement = updates.biology_acknowledgement || context.biology_acknowledgement || ''
+        progressData.inner_alarm_resources_email = updates.inner_alarm_resources_email || context.inner_alarm_resources_email || ''
+        progressData.release_resources_email = updates.release_resources_email || context.release_resources_email || ''
+        progressData.protective_archetype = updates.protective_archetype || context.protective_archetype || ''
+        progressData.archetype_acknowledgment = updates.archetype_acknowledgment || context.archetype_acknowledgment || ''
+        progressData.loop_acknowledged = updates.loop_acknowledged || context.loop_acknowledged || ''
+        progressData.essence_archetype_selection = updates.essence_archetype_selection || context.essence_archetype_selection || ''
+        progressData.essence_reveal_response = updates.essence_reveal_response || context.essence_reveal_response || ''
+        progressData.persona_selection = updates.persona_selection || context.persona_selection || ''
+        progressData.resource_opt_in = updates.resource_opt_in || context.resource_opt_in || ''
+        progressData.challenge_opt_in = updates.challenge_opt_in || context.challenge_opt_in || ''
+        progressData.closing_acknowledgement = updates.closing_acknowledgement || context.closing_acknowledgement || ''
+        progressData.email = updates.email || context.email || ''
       }
       
       await sendToSupabase(progressData)
@@ -454,34 +476,49 @@ function App({ flowSrc = '/flow.json' } = {}) { // [flowSrc]
     if (nextNode) {
       setCurrentIndex(nextIndex)
     } else {
-      // Flow completed - send final data to Airtable
+      // Flow completed - send final data to Supabase
       try {
+        const isLeadMagnetFlow = flowMeta.name?.toLowerCase().includes('lead') || 
+                                flowSrc?.includes('lead_magnet') ||
+                                currentNode?.step?.startsWith('lead_')
+        
         const finalData = {
           session_id: sessionId,
           step: 'completed',
           user_name: updates.user_name || '',
-          healing_compass_consent: updates.healing_compass_consent || '',
-          ambition_gap: updates.ambition_gap || '',
-          logical_reasons_list: updates.logical_reasons_list || '',
-          past_parallel_context: updates.past_parallel_context || '',
-          splinter_event_description: updates.splinter_event_description || '',
-          post_event_feeling: updates.post_event_feeling || '',
-          splinter_identity_verdict: updates.splinter_identity_verdict || '',
-          biology_acknowledgement: updates.biology_acknowledgement || '',
-          inner_alarm_resources_email: updates.inner_alarm_resources_email || '',
-          release_resources_email: updates.release_resources_email || '',
-          protective_archetype: updates.protective_archetype || '',
-          archetype_acknowledgment: updates.archetype_acknowledgment || '',
-          loop_acknowledged: updates.loop_acknowledged || '',
-          essence_archetype_selection: updates.essence_archetype_selection || '',
-          essence_reveal_response: updates.essence_reveal_response || '',
-          persona_selection: updates.persona_selection || '',
-          resource_opt_in: updates.resource_opt_in || '',
-          challenge_opt_in: updates.challenge_opt_in || '',
-          closing_acknowledgement: updates.closing_acknowledgement || '',
-          email: updates.email || '',
           flow_version: flowMeta.version || '1.0.0',
           flow_completed: true
+        }
+
+        if (isLeadMagnetFlow) {
+          // Lead magnet flow final data
+          finalData.protective_archetype = updates.protective_archetype_selection || 
+                                         updates.protective_archetype || ''
+          finalData.essence_archetype_selection = updates.essence_archetype_selection || ''
+          finalData.email = updates.user_email || updates.email || ''
+          finalData.persona_selection = updates.persona_selection || ''
+        } else {
+          // Healing compass flow final data
+          finalData.healing_compass_consent = updates.healing_compass_consent || ''
+          finalData.ambition_gap = updates.ambition_gap || ''
+          finalData.logical_reasons_list = updates.logical_reasons_list || ''
+          finalData.past_parallel_context = updates.past_parallel_context || ''
+          finalData.splinter_event_description = updates.splinter_event_description || ''
+          finalData.post_event_feeling = updates.post_event_feeling || ''
+          finalData.splinter_identity_verdict = updates.splinter_identity_verdict || ''
+          finalData.biology_acknowledgement = updates.biology_acknowledgement || ''
+          finalData.inner_alarm_resources_email = updates.inner_alarm_resources_email || ''
+          finalData.release_resources_email = updates.release_resources_email || ''
+          finalData.protective_archetype = updates.protective_archetype || ''
+          finalData.archetype_acknowledgment = updates.archetype_acknowledgment || ''
+          finalData.loop_acknowledged = updates.loop_acknowledged || ''
+          finalData.essence_archetype_selection = updates.essence_archetype_selection || ''
+          finalData.essence_reveal_response = updates.essence_reveal_response || ''
+          finalData.persona_selection = updates.persona_selection || ''
+          finalData.resource_opt_in = updates.resource_opt_in || ''
+          finalData.challenge_opt_in = updates.challenge_opt_in || ''
+          finalData.closing_acknowledgement = updates.closing_acknowledgement || ''
+          finalData.email = updates.email || ''
         }
         
         await sendToSupabase(finalData)
