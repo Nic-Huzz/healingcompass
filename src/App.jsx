@@ -13,6 +13,43 @@ import { resolvePrompt } from '@/lib/promptResolver' // [macros]
 import { useAuth } from '@/auth/AuthProvider'
 import { supabase } from '@/lib/supabaseClient'
 
+const API_BASE = import.meta.env.DEV ? 'http://localhost:3000' : ''
+
+const buildResponsePayload = (data = {}) => ({
+  session_id: data.session_id || '',
+  step: data.step || '',
+  user_name: data.user_name || '',
+  healing_compass_consent: data.healing_compass_consent || '',
+  ambition_gap: data.ambition_gap || '',
+  logical_reasons_list: data.logical_reasons_list || '',
+  past_parallel_context: data.past_parallel_context || '',
+  splinter_event_description: data.splinter_event_description || '',
+  post_event_feeling: data.post_event_feeling || '',
+  splinter_identity_verdict: data.splinter_identity_verdict || '',
+  biology_acknowledgement: data.biology_acknowledgement || '',
+  inner_alarm_resources_email: data.inner_alarm_resources_email || '',
+  release_resources_email: data.release_resources_email || '',
+  protective_archetype: data.protective_archetype || '',
+  archetype_acknowledgment: data.archetype_acknowledgment || '',
+  loop_acknowledged: data.loop_acknowledged || '',
+  essence_archetype_selection: data.essence_archetype_selection || '',
+  essence_reveal_response: data.essence_reveal_response || '',
+  persona_selection: data.persona_selection || '',
+  resource_opt_in: data.resource_opt_in || '',
+  challenge_opt_in: data.challenge_opt_in || '',
+  closing_acknowledgement: data.closing_acknowledgement || '',
+  email: data.email || '',
+  flow_version: data.flow_version || '1.0.0',
+  flow_completed: data.flow_completed || false,
+  // Back-compat fields
+  logical_reasons: data.logical_reasons_list || '',
+  past_parallel: data.past_parallel_context || '',
+  splinter_event: data.splinter_event_description || '',
+  splinter_identity: data.splinter_identity_verdict || '',
+  essence_archetype: data.essence_archetype_selection || '',
+  archetype_resources_email: data.release_resources_email || '',
+})
+
 function App({ flowSrc = '/flow.json' } = {}) { // [flowSrc]
   const [flow, setFlow] = useState(null)
   const [flowMeta, setFlowMeta] = useState({ name: 'No flow loaded', version: null, ok: false, error: null })
@@ -52,7 +89,7 @@ function App({ flowSrc = '/flow.json' } = {}) { // [flowSrc]
         context: answers || {},
       }
 
-      const response = await fetch('/api/lead-flow-profile', {
+      const response = await fetch(`${API_BASE}/api/lead-flow-profile`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -65,7 +102,21 @@ function App({ flowSrc = '/flow.json' } = {}) { // [flowSrc]
         console.warn('[LeadFlow] Sync failed', { status: response.status, details })
       }
     } catch (error) {
-      console.warn('[LeadFlow] Failed to sync lead magnet profile', { error: error.message })
+      console.warn('[LeadFlow] Failed to sync lead magnet profile via API', { error: error.message })
+
+      try {
+        const { error: fallbackError } = await supabase
+          .from('lead_flow_profiles')
+          .upsert(payload, { onConflict: 'session_id' })
+
+        if (fallbackError) {
+          throw fallbackError
+        }
+
+        console.warn('[Fallback] Saved lead profile directly from client')
+      } catch (fallbackError) {
+        console.error('[Fallback] Failed to save lead profile directly:', fallbackError)
+      }
     }
   }, [sessionId])
 
@@ -275,7 +326,7 @@ function App({ flowSrc = '/flow.json' } = {}) { // [flowSrc]
 
   const sendToSupabase = async (data) => {
     try {
-      const response = await fetch('/api/supabase', {
+      const response = await fetch(`${API_BASE}/api/supabase`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -291,14 +342,30 @@ function App({ flowSrc = '/flow.json' } = {}) { // [flowSrc]
       console.log('Data saved to Supabase:', result)
       return result
     } catch (error) {
-      console.error('Failed to save to Supabase:', error)
-      throw error
+      console.error('Failed to save to Supabase via API:', error)
+
+      try {
+        const payload = buildResponsePayload(data)
+        const { data: insertData, error: supabaseError } = await supabase
+          .from('responses')
+          .insert(payload)
+          .select()
+
+        if (supabaseError) {
+          throw supabaseError
+        }
+
+        console.warn('[Fallback] Saved to Supabase directly from client')
+        return insertData
+      } catch (fallbackError) {
+        console.error('[Fallback] Failed to save to Supabase directly:', fallbackError)
+      }
     }
   }
 
   const sendEmail = async (email, user_name, archetype, protective_archetype) => {
     try {
-      const response = await fetch('/api/send-email', {
+      const response = await fetch(`${API_BASE}/api/send-email`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
