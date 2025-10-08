@@ -15,6 +15,17 @@ import { supabase } from '@/lib/supabaseClient'
 
 const API_BASE = import.meta.env.DEV ? 'http://localhost:3000' : ''
 
+// lightweight toast feedback
+const useToast = () => {
+  const [toast, setToast] = useState({ open: false, text: '' })
+  const pushToast = useCallback((text) => {
+    setToast({ open: true, text })
+    window.clearTimeout((pushToast)._t)
+    ;(pushToast)._t = window.setTimeout(() => setToast({ open: false, text: '' }), 4000)
+  }, [])
+  return { toast, pushToast }
+}
+
 const buildResponsePayload = (data = {}) => ({
   session_id: data.session_id || '',
   step: data.step || '',
@@ -61,6 +72,9 @@ function App({ flowSrc = '/flow.json' } = {}) { // [flowSrc]
   const [typingMessage, setTypingMessage] = useState('')
   const [sessionId] = useState(() => `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`)
   const messagesEndRef = useRef(null)
+
+  // Toast
+  const { toast, pushToast } = useToast()
 
   // Profile management
   const { profile, updateProfileFromContext } = useEnsureProfile()
@@ -362,6 +376,9 @@ function App({ flowSrc = '/flow.json' } = {}) { // [flowSrc]
     } catch (error) {
       console.error('Failed to save to Supabase via API:', error)
 
+      if (!supabase) {
+        return null
+      }
       try {
         const payload = buildResponsePayload(data)
         const { data: insertData, error: supabaseError } = await supabase
@@ -522,15 +539,42 @@ function App({ flowSrc = '/flow.json' } = {}) { // [flowSrc]
     // Submit progress to Supabase
     await submitProgressToSupabase(updates)
 
-    // Send email if this is step 7 (inner alarm resources email)
-    if (currentNode.step === 'lead_q7_email_capture' && trimmed && trimmed.includes('@')) {
-      // Send personalized email with archetype resources
-      await sendEmail(
-        trimmed, // email address
-        updates.user_name || context.user_name,
-        updates.essence_archetype_selection || context.essence_archetype_selection,
-        updates.protective_archetype || context.protective_archetype
-      )
+    // Email + magic link for both flows (Lead Magnet + legacy)
+    const isLeadEmailStep   = currentNode.step === 'lead_q7_email_capture'
+    const isLegacyEmailStep = currentNode.step === 'q7_connect_dots_inner_alarm_opt_in'
+    const candidateEmail =
+      trimmed ||
+      updates.user_email ||
+      updates.email ||
+      context.user_email ||
+      context.email
+
+    const emailRegex = /^\S+@\S+\.\S+$/
+
+    if ((isLeadEmailStep || isLegacyEmailStep) && candidateEmail && emailRegex.test(candidateEmail)) {
+      // 1) Send Supabase magic link so user can open /me
+      try {
+        await signInWithMagicLink(candidateEmail)
+        pushToast('Magic link sent! Check your inbox to open your profile.')
+      } catch (err) {
+        console.warn('[Auth] magic link failed', err)
+        pushToast('Could not send magic link. You can still continue the flow.')
+      }
+
+      // 2) Send Resend transactional email with archetype context (non-blocking)
+      try {
+        await sendEmail(
+          candidateEmail,
+          updates.user_name || context.user_name,
+          updates.essence_archetype_selection || context.essence_archetype_selection,
+          // prefer selected protective if present, then stored
+          updates.protective_archetype_selection || updates.protective_archetype || context.protective_archetype
+        )
+        pushToast('Archetype email sent (via Resend).')
+      } catch (err) {
+        console.warn('[Email] sendEmail failed', err)
+        pushToast('We couldn\'t send the archetype email, but your progress is saved.')
+      }
     }
 
     // Simulate AI thinking time
@@ -980,6 +1024,29 @@ function App({ flowSrc = '/flow.json' } = {}) { // [flowSrc]
           {isLoading ? '...' : 'Send'}
         </button>
       </footer>
+      {toast.open && (
+        <div
+          style={{
+            position: 'fixed',
+            bottom: 16,
+            left: '50%',
+            transform: 'translateX(-50%)',
+            background: '#1f2937',
+            color: '#fff',
+            padding: '10px 14px',
+            borderRadius: 8,
+            boxShadow: '0 10px 24px rgba(0,0,0,0.2)',
+            zIndex: 2000,
+            fontSize: 14,
+            maxWidth: '90vw',
+            textAlign: 'center'
+          }}
+          role="status"
+          aria-live="polite"
+        >
+          {toast.text}
+        </div>
+      )}
     </div>
   )
 }
