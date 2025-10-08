@@ -52,9 +52,18 @@ function App({ flowSrc = '/flow.json' } = {}) { // [flowSrc]
         context: answers || {},
       }
 
-      await supabase
-        .from('lead_flow_profiles')
-        .upsert(payload, { onConflict: 'session_id' })
+      const response = await fetch('/api/lead-flow-profile', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ payload })
+      })
+
+      if (!response.ok) {
+        const details = await response.text()
+        console.warn('[LeadFlow] Sync failed', { status: response.status, details })
+      }
     } catch (error) {
       console.warn('[LeadFlow] Failed to sync lead magnet profile', { error: error.message })
     }
@@ -406,27 +415,11 @@ function App({ flowSrc = '/flow.json' } = {}) { // [flowSrc]
     // Submit progress to Supabase
     await submitProgressToSupabase(updates)
 
-    const emailCaptureSteps = new Set([
-      'q7_connect_dots_inner_alarm_opt_in',
-      'lead_q7_email_capture'
-    ])
-
-    if (emailCaptureSteps.has(currentNode.step) && trimmed && trimmed.includes('@')) {
-      const emailToUse = trimmed
-
-      if (!user) {
-        try {
-          const { error } = await signInWithMagicLink(emailToUse)
-          if (error) {
-            console.warn('[App] Magic link trigger failed', { error: error.message })
-          }
-        } catch (error) {
-          console.warn('[App] Magic link trigger exception', error)
-        }
-      }
-
+    // Send email if this is step 7 (inner alarm resources email)
+    if (currentNode.step === 'q7_connect_dots_inner_alarm_opt_in' && trimmed && trimmed.includes('@')) {
+      // Send personalized email with archetype resources
       await sendEmail(
-        emailToUse,
+        trimmed, // email address
         updates.user_name || context.user_name,
         updates.essence_archetype_selection || context.essence_archetype_selection,
         updates.protective_archetype || context.protective_archetype
@@ -562,33 +555,6 @@ function App({ flowSrc = '/flow.json' } = {}) { // [flowSrc]
 
     // Submit progress to Supabase
     await submitProgressToSupabase(updates)
-
-    const emailCaptureSteps = new Set([
-      'q7_connect_dots_inner_alarm_opt_in',
-      'lead_q7_email_capture'
-    ])
-
-    if (emailCaptureSteps.has(currentNode.step) && typeof value === 'string' && value.includes('@')) {
-      const emailToUse = value
-
-      if (!user) {
-        try {
-          const { error } = await signInWithMagicLink(emailToUse)
-          if (error) {
-            console.warn('[App] Magic link trigger failed', { error: error.message })
-          }
-        } catch (error) {
-          console.warn('[App] Magic link trigger exception', error)
-        }
-      }
-
-      await sendEmail(
-        emailToUse,
-        updates.user_name || context.user_name,
-        updates.essence_archetype_selection || context.essence_archetype_selection,
-        updates.protective_archetype || context.protective_archetype
-      )
-    }
 
     // Simulate AI thinking time
     await new Promise(resolve => setTimeout(resolve, 800))
