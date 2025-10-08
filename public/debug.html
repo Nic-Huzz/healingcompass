@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug Test</title>
+</head>
+<body>
+    <h1>Debug Test</h1>
+    <p>If you can see this, the basic deployment is working.</p>
+    <script>
+        console.log('Debug script running');
+        console.log('Environment check:', {
+            VITE_SUPABASE_URL: typeof import.meta !== 'undefined' ? import.meta.env?.VITE_SUPABASE_URL : 'import.meta not available',
+            VITE_SUPABASE_ANON_KEY: typeof import.meta !== 'undefined' ? import.meta.env?.VITE_SUPABASE_ANON_KEY : 'import.meta not available'
+        });
+    </script>
+</body>
+</html>
