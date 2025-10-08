@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '../lib/supabaseClient'
 
 export function useEnsureProfile() {
@@ -59,7 +59,7 @@ export function useEnsureProfile() {
     ensureProfile()
   }, [])
 
-  const updateProfileFromContext = async (context) => {
+  const updateProfileFromContext = useCallback(async (context) => {
     try {
       const { data: { session } } = await supabase.auth.getSession()
       if (!session?.user || !profile) return
@@ -67,10 +67,13 @@ export function useEnsureProfile() {
       const updates = {}
       
       if (context.user_name) updates.display_name = context.user_name
-      if (context.email || context.archetype_resources_email) updates.email = context.email || context.archetype_resources_email
+      const emailFromContext = context.email || context.archetype_resources_email || context.inner_alarm_resources_email || context.user_email
+      if (emailFromContext) updates.email = emailFromContext
       if (context.essence_archetype_selection) updates.essence_archetype = context.essence_archetype_selection
-      if (context.protective_archetype) updates.protective_archetype = context.protective_archetype
-      if (context.persona_selection) updates.persona = context.persona_selection
+      const protectiveValue = context.protective_archetype_selection || context.protective_archetype
+      if (protectiveValue) updates.protective_archetype = protectiveValue
+      const personaValue = context.persona_selection || context.persona
+      if (personaValue) updates.persona = personaValue
 
       if (Object.keys(updates).length === 0) return
 
@@ -89,7 +92,7 @@ export function useEnsureProfile() {
     } catch (error) {
       console.warn('Error updating profile from context:', error)
     }
-  }
+  }, [profile])
 
   return { profile, loading, updateProfileFromContext }
 }

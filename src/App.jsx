@@ -5,11 +5,13 @@ Allowed edits:
 - Hydrate from getLastSession()
 - Call upsertSession/logEvent in submit paths
 */
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useMemo, useCallback } from 'react'
 import './App.css'
 import { upsertSession, logEvent, getLastSession } from './lib/flowPersistence'
 import { useEnsureProfile } from './hooks/useEnsureProfile'
 import { resolvePrompt } from '@/lib/promptResolver' // [macros]
+import { useAuth } from '@/auth/AuthProvider'
+import { supabase } from '@/lib/supabaseClient'
 
 function App({ flowSrc = '/flow.json' } = {}) { // [flowSrc]
   const [flow, setFlow] = useState(null)
@@ -25,6 +27,146 @@ function App({ flowSrc = '/flow.json' } = {}) { // [flowSrc]
 
   // Profile management
   const { profile, updateProfileFromContext } = useEnsureProfile()
+  const { user, signInWithMagicLink } = useAuth()
+  const [isSendingLoginLink, setIsSendingLoginLink] = useState(false)
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false)
+  const [loginEmail, setLoginEmail] = useState('')
+  const [loginFeedback, setLoginFeedback] = useState('')
+  const lastProfileSyncKey = useRef(null)
+
+  const syncLeadFlowProfile = useCallback(async (answers) => {
+    try {
+      const { data: sessionData } = await supabase.auth.getSession()
+      const supaUser = sessionData?.session?.user
+
+      const payload = {
+        session_id: sessionId,
+        user_id: supaUser?.id ?? null,
+        user_name: answers.user_name || null,
+        protective_archetype: answers.protective_archetype_selection || answers.protective_archetype || null,
+        protective_confirm: answers.protective_archetype_reflect || null,
+        essence_archetype: answers.essence_archetype_selection || answers.essence_archetype || null,
+        essence_confirm: answers.essence_archetype_reflect || null,
+        email: answers.user_email || answers.email || answers.inner_alarm_resources_email || null,
+        persona: answers.persona_selection || answers.persona || null,
+        context: answers || {},
+      }
+
+      await supabase
+        .from('lead_flow_profiles')
+        .upsert(payload, { onConflict: 'session_id' })
+    } catch (error) {
+      console.warn('[LeadFlow] Failed to sync lead magnet profile', { error: error.message })
+    }
+  }, [sessionId])
+
+  const profileSyncPayload = useMemo(() => ({
+    user_name: context.user_name,
+    email: context.email,
+    user_email: context.user_email,
+    inner_alarm_resources_email: context.inner_alarm_resources_email,
+    archetype_resources_email: context.archetype_resources_email,
+    essence_archetype_selection: context.essence_archetype_selection,
+    essence_archetype: context.essence_archetype,
+    protective_archetype_selection: context.protective_archetype_selection,
+    protective_archetype: context.protective_archetype,
+    persona_selection: context.persona_selection,
+    persona: context.persona
+  }), [
+    context.user_name,
+    context.email,
+    context.user_email,
+    context.inner_alarm_resources_email,
+    context.archetype_resources_email,
+    context.essence_archetype_selection,
+    context.essence_archetype,
+    context.protective_archetype_selection,
+    context.protective_archetype,
+    context.persona_selection,
+    context.persona
+  ])
+
+  const profileSyncDisplayName = profileSyncPayload.user_name || ''
+  const profileSyncEmail = profileSyncPayload.user_email
+    || profileSyncPayload.email
+    || profileSyncPayload.inner_alarm_resources_email
+    || profileSyncPayload.archetype_resources_email
+    || ''
+  const profileSyncProtective = profileSyncPayload.protective_archetype_selection
+    || profileSyncPayload.protective_archetype
+    || ''
+  const profileSyncEssence = profileSyncPayload.essence_archetype_selection
+    || profileSyncPayload.essence_archetype
+    || ''
+  const profileSyncPersona = profileSyncPayload.persona_selection
+    || profileSyncPayload.persona
+    || ''
+
+  const profileSyncKey = useMemo(
+    () => JSON.stringify({
+      profileSyncDisplayName,
+      profileSyncEmail,
+      profileSyncProtective,
+      profileSyncEssence,
+      profileSyncPersona
+    }),
+    [
+      profileSyncDisplayName,
+      profileSyncEmail,
+      profileSyncProtective,
+      profileSyncEssence,
+      profileSyncPersona
+    ]
+  )
+
+  const profileSyncHasData = useMemo(
+    () => Boolean(
+      profileSyncDisplayName
+      || profileSyncEmail
+      || profileSyncProtective
+      || profileSyncEssence
+      || profileSyncPersona
+    ),
+    [
+      profileSyncDisplayName,
+      profileSyncEmail,
+      profileSyncProtective,
+      profileSyncEssence,
+      profileSyncPersona
+    ]
+  )
+
+  useEffect(() => {
+    if (!user || !profile) return
+    if (!profileSyncHasData) return
+    if (lastProfileSyncKey.current === profileSyncKey) return
+
+    let isCancelled = false
+
+    const syncProfile = async () => {
+      try {
+        await updateProfileFromContext(profileSyncPayload)
+        if (!isCancelled) {
+          lastProfileSyncKey.current = profileSyncKey
+        }
+      } catch (error) {
+        console.warn('[App] Lead flow profile sync failed', { error: error.message })
+      }
+    }
+
+    syncProfile()
+
+    return () => {
+      isCancelled = true
+    }
+  }, [
+    user?.id,
+    profile?.id,
+    profileSyncKey,
+    profileSyncHasData,
+    profileSyncPayload,
+    updateProfileFromContext
+  ])
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -256,6 +398,7 @@ function App({ flowSrc = '/flow.json' } = {}) { // [flowSrc]
       }
       // Update profile from context
       updateProfileFromContext(updates)
+      syncLeadFlowProfile(updates)
     } catch (error) {
       console.warn('[App] Persistence failed', { error: error.message })
     }
@@ -396,6 +539,7 @@ function App({ flowSrc = '/flow.json' } = {}) { // [flowSrc]
       }
       // Update profile from context
       updateProfileFromContext(updates)
+      syncLeadFlowProfile(updates)
     } catch (error) {
       console.warn('[App] Persistence failed', { error: error.message })
     }
@@ -460,6 +604,44 @@ function App({ flowSrc = '/flow.json' } = {}) { // [flowSrc]
     }
   }
 
+  const handleLoginClick = () => {
+    setLoginFeedback('')
+    setLoginEmail('')
+    setIsLoginModalOpen(true)
+  }
+
+  const handleLoginSubmit = async (event) => {
+    event.preventDefault()
+    const emailTrimmed = loginEmail.trim()
+    if (!emailTrimmed) {
+      setLoginFeedback('Please enter an email address.')
+      return
+    }
+    setIsSendingLoginLink(true)
+    try {
+      const { error } = await signInWithMagicLink(emailTrimmed)
+      if (error) {
+        console.warn('[App] Magic link request failed', { error: error.message })
+        setLoginFeedback('We could not send the magic link. Please try again.')
+      } else {
+        setLoginFeedback('Magic link sent! Check your email to access your profile.')
+        setLoginEmail('')
+      }
+    } catch (error) {
+      console.warn('[App] Magic link exception', error)
+      setLoginFeedback('Something went wrong. Please try again.')
+    } finally {
+      setIsSendingLoginLink(false)
+    }
+  }
+
+  const handleLoginClose = () => {
+    if (isSendingLoginLink) return
+    setIsLoginModalOpen(false)
+    setLoginFeedback('')
+    setLoginEmail('')
+  }
+
 
   return (
     <div className="app">
@@ -475,23 +657,140 @@ function App({ flowSrc = '/flow.json' } = {}) { // [flowSrc]
               )}
             </p>
           </div>
-          <a 
-            href="/me" 
-            style={{
-              background: 'none',
-              border: '1px solid #5e17eb',
-              color: '#5e17eb',
-              padding: '8px 16px',
-              borderRadius: '6px',
-              textDecoration: 'none',
-              fontSize: '14px',
-              fontWeight: '500'
-            }}
-          >
-            My Profile
-          </a>
+          {user ? (
+            <a 
+              href="/me" 
+              style={{
+                background: 'none',
+                border: '1px solid #5e17eb',
+                color: '#5e17eb',
+                padding: '8px 16px',
+                borderRadius: '6px',
+                textDecoration: 'none',
+                fontSize: '14px',
+                fontWeight: '500'
+              }}
+            >
+              My Profile
+            </a>
+          ) : (
+            <button
+              type="button"
+              onClick={handleLoginClick}
+              disabled={isSendingLoginLink}
+              style={{
+                background: 'none',
+                border: '1px solid #5e17eb',
+                color: '#5e17eb',
+                padding: '8px 16px',
+                borderRadius: '6px',
+                fontSize: '14px',
+                fontWeight: '500',
+                cursor: 'pointer'
+              }}
+            >
+              Log in
+            </button>
+          )}
         </div>
       </header>
+
+      {!user && isLoginModalOpen && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(0,0,0,0.45)',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            zIndex: 1000,
+            padding: '20px'
+          }}
+        >
+          <div
+            style={{
+              background: '#fff',
+              borderRadius: '12px',
+              padding: '28px',
+              width: 'min(420px, 100%)',
+              boxShadow: '0 12px 40px rgba(94,23,235,0.2)',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '16px'
+            }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+              <div>
+                <h2 style={{ margin: '0 0 4px 0' }}>Access your profile</h2>
+                <p style={{ margin: 0, color: '#555' }}>Enter your email and we’ll send you a magic link.</p>
+              </div>
+              <button
+                type="button"
+                onClick={handleLoginClose}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  fontSize: '20px',
+                  lineHeight: '1',
+                  cursor: isSendingLoginLink ? 'not-allowed' : 'pointer',
+                  color: '#888'
+                }}
+                disabled={isSendingLoginLink}
+              >
+                ×
+              </button>
+            </div>
+
+            <form onSubmit={handleLoginSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <label style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontWeight: 500 }}>
+                Email address
+                <input
+                  type="email"
+                  value={loginEmail}
+                  onChange={(event) => setLoginEmail(event.target.value)}
+                  placeholder="you@example.com"
+                  required
+                  style={{
+                    padding: '12px 14px',
+                    borderRadius: '8px',
+                    border: '1px solid #d6d3f5',
+                    fontSize: '15px'
+                  }}
+                  disabled={isSendingLoginLink}
+                />
+              </label>
+              {loginFeedback && (
+                <div style={{
+                  background: loginFeedback.startsWith('Magic link sent') ? '#edf8ef' : '#fff4f4',
+                  borderRadius: '8px',
+                  padding: '10px 12px',
+                  color: loginFeedback.startsWith('Magic link sent') ? '#215732' : '#9f1b32',
+                  fontSize: '14px'
+                }}>
+                  {loginFeedback}
+                </div>
+              )}
+              <button
+                type="submit"
+                disabled={isSendingLoginLink}
+                style={{
+                  background: 'linear-gradient(135deg, #5e17eb, #ffdd27)',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: '8px',
+                  padding: '12px 16px',
+                  fontSize: '15px',
+                  fontWeight: 600,
+                  cursor: isSendingLoginLink ? 'not-allowed' : 'pointer'
+                }}
+              >
+                {isSendingLoginLink ? 'Sending magic link…' : 'Send magic link'}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
 
 
       <main className="chat-container">
