@@ -5,7 +5,7 @@
   "type": "module",
   "engines": { "node": ">=20 <21" },
   "scripts": {
-    "build": "vite build",
+    "build": "VITE_SUPABASE_URL=https://qlwfcfypnoptsocdpxuv.supabase.co VITE_SUPABASE_ANON_KEY=sb_publishable_Qizrwuj2oqRtuK2tJx7uxg_M7Bb9WZH vite build",
     "dev": "vite",
     "check:node": "node -e \"const v=process.versions.node.split('.')[0]; if(v<20){process.exit(1)}\"",
     "lint": "eslint .",
