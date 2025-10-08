@@ -72,50 +72,68 @@ function App({ flowSrc = '/flow.json' } = {}) { // [flowSrc]
   const lastProfileSyncKey = useRef(null)
 
   const syncLeadFlowProfile = useCallback(async (answers) => {
+    if (!supabase) {
+      console.warn('[LeadFlow] Supabase not available, skipping sync')
+      return
+    }
+    
+    const { data: sessionData } = await supabase.auth.getSession()
+    const supaUser = sessionData?.session?.user
+
+    const payload = {
+      session_id: sessionId,
+      user_id: supaUser?.id ?? null,
+      user_name: answers.user_name || null,
+      protective_archetype:
+        answers.protective_archetype_selection ||
+        answers.protective_archetype ||
+        null,
+      protective_confirm: answers.protective_archetype_reflect || null,
+      essence_archetype:
+        answers.essence_archetype_selection ||
+        answers.essence_archetype ||
+        null,
+      essence_confirm: answers.essence_archetype_reflect || null,
+      email:
+        answers.user_email ||
+        answers.email ||
+        answers.inner_alarm_resources_email ||
+        null,
+      persona: answers.persona_selection || answers.persona || null,
+      context: answers || {},
+    }
+
     try {
-      const { data: sessionData } = await supabase.auth.getSession()
-      const supaUser = sessionData?.session?.user
-
-      const payload = {
-        session_id: sessionId,
-        user_id: supaUser?.id ?? null,
-        user_name: answers.user_name || null,
-        protective_archetype: answers.protective_archetype_selection || answers.protective_archetype || null,
-        protective_confirm: answers.protective_archetype_reflect || null,
-        essence_archetype: answers.essence_archetype_selection || answers.essence_archetype || null,
-        essence_confirm: answers.essence_archetype_reflect || null,
-        email: answers.user_email || answers.email || answers.inner_alarm_resources_email || null,
-        persona: answers.persona_selection || answers.persona || null,
-        context: answers || {},
-      }
-
       const response = await fetch(`${API_BASE}/api/lead-flow-profile`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ payload })
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ payload }),
       })
-
       if (!response.ok) {
         const details = await response.text()
-        console.warn('[LeadFlow] Sync failed', { status: response.status, details })
+        console.warn('[LeadFlow] Sync failed', {
+          status: response.status,
+          details,
+        })
       }
     } catch (error) {
-      console.warn('[LeadFlow] Failed to sync lead magnet profile via API', { error: error.message })
-
+      console.warn(
+        '[LeadFlow] Failed to sync via API — falling back to client insert',
+        { error: error.message }
+      )
       try {
+        if (!supabase) {
+          console.warn('[Fallback] Supabase not available, cannot save lead profile')
+          return
+        }
+        
         const { error: fallbackError } = await supabase
           .from('lead_flow_profiles')
           .upsert(payload, { onConflict: 'session_id' })
-
-        if (fallbackError) {
-          throw fallbackError
-        }
-
+        if (fallbackError) throw fallbackError
         console.warn('[Fallback] Saved lead profile directly from client')
       } catch (fallbackError) {
-        console.error('[Fallback] Failed to save lead profile directly:', fallbackError)
+        console.error('[Fallback] Failed to save lead profile:', fallbackError)
       }
     }
   }, [sessionId])
@@ -505,7 +523,7 @@ function App({ flowSrc = '/flow.json' } = {}) { // [flowSrc]
     await submitProgressToSupabase(updates)
 
     // Send email if this is step 7 (inner alarm resources email)
-    if (currentNode.step === 'q7_connect_dots_inner_alarm_opt_in' && trimmed && trimmed.includes('@')) {
+    if (currentNode.step === 'lead_q7_email_capture' && trimmed && trimmed.includes('@')) {
       // Send personalized email with archetype resources
       await sendEmail(
         trimmed, // email address
@@ -520,9 +538,16 @@ function App({ flowSrc = '/flow.json' } = {}) { // [flowSrc]
 
     // Check if this is the last step
     const isLastStep = !nextNode
-    const responseText = currentNode.response_handling && currentNode.response_handling[trimmed]
-      ? currentNode.response_handling[trimmed]
-      : (nextNode ? resolvePrompt(nextNode, updates) : 'Flow completed') // [macros]
+    let responseText
+    try {
+      const handled = currentNode.response_handling && currentNode.response_handling[trimmed]
+      responseText = handled
+        ? currentNode.response_handling[trimmed]
+        : (nextNode ? resolvePrompt(nextNode, updates) : 'Flow completed')
+    } catch (e) {
+      console.warn('Prompt resolve failed (free text)', e)
+      responseText = nextNode?.prompt || '...'
+    }
 
     // Add AI message with typewriter effect
     const aiMessage = { 
@@ -666,24 +691,15 @@ function App({ flowSrc = '/flow.json' } = {}) { // [flowSrc]
     // Check if this is the last step
     const isLastStep = !nextNode
     
-    // Special handling for archetype reveal step (step 10)
     let responseText
-    if (currentNode.step === 'q10_essence_archetype_reclaim' && currentNode.response_handling) {
-      const selectedArchetype = updates.essence_archetype_selection
-      const archetypeData = currentNode.response_handling[selectedArchetype]
-      if (archetypeData) {
-        // Use the archetype reveal template with archetype-specific data
-        const revealTemplate = "You are the **{{essence_archetype_selection}}**.\n\n{{poetic_line}}\n\nYou carry a frequency that others feel — even when they can't name it.\n{{energetic_transmission}}\n\nAt your core, your essence is:\n{{essence}}\n\nYour natural superpower — the way you shift spaces and people is —\n{{superpower}}\n\nLet your path be guided by this deeper truth:\n{{north_star}}\n\nI see a vision for your future. To fulfil it, ask yourself:\n{{poetic_vision}}\n\nWhen you live this truth out loud — not just in theory but in embodiment —\n{{vision_in_action}}\n\n**Does this feel like you?**"
-        responseText = resolvePrompt({ prompt: revealTemplate }, { ...updates, ...archetypeData }) // [macros]
-      } else {
-        responseText = nextNode ? resolvePrompt(nextNode, updates) : 'Flow completed' // [macros]
-      }
-    } else {
-      // Standard response handling
+    try {
       const hasResponseHandling = currentNode.response_handling && currentNode.response_handling[value]
       responseText = hasResponseHandling
         ? currentNode.response_handling[value]
-        : (nextNode ? resolvePrompt(nextNode, updates) : 'Flow completed') // [macros]
+        : (nextNode ? resolvePrompt(nextNode, updates) : 'Flow completed')
+    } catch (e) {
+      console.warn('Prompt resolve failed (option)', e)
+      responseText = nextNode?.prompt || '...'
     }
 
     // Add AI message with typewriter effect
