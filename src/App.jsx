@@ -508,13 +508,25 @@ function App({ flowSrc = '/flow.json' } = {}) { // [flowSrc]
 
     const emailRegex = /^\S+@\S+\.\S+$/
 
+    console.log('[Magic Link Debug]', {
+      currentStep: currentNode.step,
+      isLeadEmailStep,
+      isLegacyEmailStep,
+      candidateEmail,
+      emailValid: candidateEmail ? emailRegex.test(candidateEmail) : false,
+      willTrigger: (isLeadEmailStep || isLegacyEmailStep) && candidateEmail && emailRegex.test(candidateEmail)
+    })
+
     if ((isLeadEmailStep || isLegacyEmailStep) && candidateEmail && emailRegex.test(candidateEmail)) {
       // Magic link only (no follow-up marketing email)
+      console.log('[Magic Link] Triggering magic link for:', candidateEmail)
       try {
         await signInWithMagicLink(candidateEmail)
       } catch (err) {
         console.warn('[Auth] magic link failed', err)
       }
+    } else {
+      console.log('[Magic Link] Not triggering - conditions not met')
     }
 
     // Simulate AI thinking time
