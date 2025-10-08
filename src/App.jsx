@@ -15,17 +15,6 @@ import { supabase } from '@/lib/supabaseClient'
 
 const API_BASE = import.meta.env.DEV ? 'http://localhost:3000' : ''
 
-// lightweight toast feedback
-const useToast = () => {
-  const [toast, setToast] = useState({ open: false, text: '' })
-  const pushToast = useCallback((text) => {
-    setToast({ open: true, text })
-    window.clearTimeout((pushToast)._t)
-    ;(pushToast)._t = window.setTimeout(() => setToast({ open: false, text: '' }), 4000)
-  }, [])
-  return { toast, pushToast }
-}
-
 const buildResponsePayload = (data = {}) => ({
   session_id: data.session_id || '',
   step: data.step || '',
@@ -72,9 +61,6 @@ function App({ flowSrc = '/flow.json' } = {}) { // [flowSrc]
   const [typingMessage, setTypingMessage] = useState('')
   const [sessionId] = useState(() => `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`)
   const messagesEndRef = useRef(null)
-
-  // Toast
-  const { toast, pushToast } = useToast()
 
   // Profile management
   const { profile, updateProfileFromContext } = useEnsureProfile()
@@ -398,35 +384,6 @@ function App({ flowSrc = '/flow.json' } = {}) { // [flowSrc]
     }
   }
 
-  const sendEmail = async (email, user_name, archetype, protective_archetype) => {
-    try {
-      const response = await fetch(`${API_BASE}/api/send-email`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ 
-          email, 
-          user_name, 
-          archetype, 
-          protective_archetype 
-        })
-      })
-
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`)
-      }
-
-      const result = await response.json()
-      console.log('Email sent successfully:', result)
-      return result
-    } catch (error) {
-      console.error('Failed to send email:', error)
-      // Don't throw error - email failure shouldn't break the flow
-    }
-  }
-
-
   const currentNode = flow?.nodes?.[currentIndex]
   const canAdvance = () => {
     if (!currentNode) return false
@@ -552,28 +509,11 @@ function App({ flowSrc = '/flow.json' } = {}) { // [flowSrc]
     const emailRegex = /^\S+@\S+\.\S+$/
 
     if ((isLeadEmailStep || isLegacyEmailStep) && candidateEmail && emailRegex.test(candidateEmail)) {
-      // 1) Send Supabase magic link so user can open /me
+      // Magic link only (no follow-up marketing email)
       try {
         await signInWithMagicLink(candidateEmail)
-        pushToast('Magic link sent! Check your inbox to open your profile.')
       } catch (err) {
         console.warn('[Auth] magic link failed', err)
-        pushToast('Could not send magic link. You can still continue the flow.')
-      }
-
-      // 2) Send Resend transactional email with archetype context (non-blocking)
-      try {
-        await sendEmail(
-          candidateEmail,
-          updates.user_name || context.user_name,
-          updates.essence_archetype_selection || context.essence_archetype_selection,
-          // prefer selected protective if present, then stored
-          updates.protective_archetype_selection || updates.protective_archetype || context.protective_archetype
-        )
-        pushToast('Archetype email sent (via Resend).')
-      } catch (err) {
-        console.warn('[Email] sendEmail failed', err)
-        pushToast('We couldn\'t send the archetype email, but your progress is saved.')
       }
     }
 
@@ -1024,29 +964,6 @@ function App({ flowSrc = '/flow.json' } = {}) { // [flowSrc]
           {isLoading ? '...' : 'Send'}
         </button>
       </footer>
-      {toast.open && (
-        <div
-          style={{
-            position: 'fixed',
-            bottom: 16,
-            left: '50%',
-            transform: 'translateX(-50%)',
-            background: '#1f2937',
-            color: '#fff',
-            padding: '10px 14px',
-            borderRadius: 8,
-            boxShadow: '0 10px 24px rgba(0,0,0,0.2)',
-            zIndex: 2000,
-            fontSize: 14,
-            maxWidth: '90vw',
-            textAlign: 'center'
-          }}
-          role="status"
-          aria-live="polite"
-        >
-          {toast.text}
-        </div>
-      )}
     </div>
   )
 }
