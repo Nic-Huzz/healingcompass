@@ -22,8 +22,5 @@
       "src": "/(.*)",
       "dest": "/index.html"
     }
-  ],
-  "ignore": [
-    "node_modules/**"
   ]
 }
