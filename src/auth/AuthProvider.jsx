@@ -51,13 +51,19 @@ export function AuthProvider({ children }) {
 
   const signInWithMagicLink = useCallback(async (email) => {
     if (!email) {
+      console.error('[AuthProvider] No email provided')
       return { error: new Error('Email is required') }
     }
 
-    console.log('[AuthProvider] Attempting magic link for:', email.trim())
+    console.log('[AuthProvider] === MAGIC LINK DEBUG START ===')
+    console.log('[AuthProvider] Email:', email.trim())
     console.log('[AuthProvider] Redirect URL:', window.location.origin)
+    console.log('[AuthProvider] Supabase client available:', !!supabase)
+    console.log('[AuthProvider] Current URL:', window.location.href)
 
     try {
+      console.log('[AuthProvider] Calling supabase.auth.signInWithOtp...')
+      
       const { data, error } = await supabase.auth.signInWithOtp({
         email: email.trim(),
         options: {
@@ -65,17 +71,31 @@ export function AuthProvider({ children }) {
         }
       })
 
-      console.log('[AuthProvider] Magic link response:', { data, error })
+      console.log('[AuthProvider] === SUPABASE RESPONSE ===')
+      console.log('[AuthProvider] Data:', data)
+      console.log('[AuthProvider] Error:', error)
+      console.log('[AuthProvider] Error code:', error?.code)
+      console.log('[AuthProvider] Error message:', error?.message)
+      console.log('[AuthProvider] Error details:', error?.details)
 
       if (error) {
-        console.warn('[AuthProvider] Magic link error', { error: error.message })
+        console.error('[AuthProvider] Magic link failed:', {
+          code: error.code,
+          message: error.message,
+          details: error.details,
+          status: error.status
+        })
         return { error }
       }
 
-      console.log('[AuthProvider] Magic link sent successfully')
+      console.log('[AuthProvider] ✅ Magic link sent successfully')
       return { error: null }
     } catch (error) {
-      console.warn('[AuthProvider] Magic link exception', { error: error.message })
+      console.error('[AuthProvider] Magic link exception:', {
+        name: error.name,
+        message: error.message,
+        stack: error.stack
+      })
       return { error }
     }
   }, [])
