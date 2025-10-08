@@ -54,19 +54,25 @@ export function AuthProvider({ children }) {
       return { error: new Error('Email is required') }
     }
 
+    console.log('[AuthProvider] Attempting magic link for:', email.trim())
+    console.log('[AuthProvider] Redirect URL:', window.location.origin)
+
     try {
-      const { error } = await supabase.auth.signInWithOtp({
+      const { data, error } = await supabase.auth.signInWithOtp({
         email: email.trim(),
         options: {
           emailRedirectTo: `${window.location.origin}`
         }
       })
 
+      console.log('[AuthProvider] Magic link response:', { data, error })
+
       if (error) {
         console.warn('[AuthProvider] Magic link error', { error: error.message })
         return { error }
       }
 
+      console.log('[AuthProvider] Magic link sent successfully')
       return { error: null }
     } catch (error) {
       console.warn('[AuthProvider] Magic link exception', { error: error.message })
