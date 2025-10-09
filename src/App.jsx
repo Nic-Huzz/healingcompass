@@ -732,7 +732,9 @@ function App({ flowSrc = '/flow.json' } = {}) { // [flowSrc]
   }
 
   const handleKeyDown = (e) => {
+    console.log('[App] handleKeyDown called with key:', e.key)
     if (e.key === 'Enter' && !e.shiftKey) {
+      console.log('[App] Enter pressed, calling submitFreeText')
       e.preventDefault()
       submitFreeText()
     }
