@@ -16,12 +16,13 @@ export default defineConfig({
     sourcemap: false,
     rollupOptions: {
       output: {
-        manualChunks: undefined
-      }
-    }
+        manualChunks: undefined,
+      },
+    },
   },
+
   server: {
     port: 5173,
     host: true
-  }
+  },
 })
