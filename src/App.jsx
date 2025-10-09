@@ -454,8 +454,12 @@ function App({ flowSrc = '/flow.json' } = {}) { // [flowSrc]
   }
 
   const submitFreeText = async () => {
+    console.log('[App] submitFreeText called with inputText:', inputText)
     const trimmed = inputText.trim()
-    if (!trimmed || !currentNode || isLoading) return
+    if (!trimmed || !currentNode || isLoading) {
+      console.log('[App] submitFreeText early return:', { trimmed, currentNode: currentNode?.step, isLoading })
+      return
+    }
 
     setIsLoading(true)
     const userMessage = { id: Date.now()+':u', isAI: false, text: trimmed, timestamp: new Date().toLocaleTimeString() }
