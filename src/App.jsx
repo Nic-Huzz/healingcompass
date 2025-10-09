@@ -508,14 +508,19 @@ function App({ flowSrc = '/flow.json' } = {}) { // [flowSrc]
 
     const emailRegex = /^\S+@\S+\.\S+$/
 
-    console.log('[Magic Link Debug]', {
+    // --- DETAILED DEBUG LOGGING ---
+    console.log('[Magic Link Debug - Pre-Check]', {
       currentStep: currentNode.step,
       isLeadEmailStep,
       isLegacyEmailStep,
       candidateEmail,
       emailValid: candidateEmail ? emailRegex.test(candidateEmail) : false,
-      willTrigger: (isLeadEmailStep || isLegacyEmailStep) && candidateEmail && emailRegex.test(candidateEmail)
+      willTrigger: (isLeadEmailStep || isLegacyEmailStep) && candidateEmail && emailRegex.test(candidateEmail),
+      trimmed,
+      updates,
+      context
     })
+    // --- END DETAILED DEBUG LOGGING ---
 
     if ((isLeadEmailStep || isLegacyEmailStep) && candidateEmail && emailRegex.test(candidateEmail)) {
       // Magic link only (no follow-up marketing email)
